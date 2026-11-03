@@ -18,6 +18,14 @@ npm run images     # re-exports AVIF/WebP from the client zips (TF_ASSETS=<folde
 
 Deploy the repo root as a static site (Vercel or Netlify, no build command needed; `vercel.json` and `netlify.toml` set cache headers). Run `npm run build` with the real `SITE_URL` before deploying.
 
+## Deploy to the VPS (GitHub Actions)
+
+`.github/workflows/deploy.yml` runs on push to `main` (or manually): `npm run build` with `SITE_URL`, rsync of `index.html`, `checkout/`, `assets/`, `robots.txt` and `sitemap.xml` to the VPS, then a smoke test.
+
+Repository secrets: `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS` (`ssh-keyscan -H <host>`), `VPS_HOST`, `VPS_USER`.
+Repository variables: `SITE_URL` (public URL, no trailing slash), `VPS_DEPLOY_PATH` (default `/var/www/frosted-cranberry`).
+The VPS web server (nginx/Caddy) must serve that folder as the site root and map `/checkout` to `checkout/index.html`.
+
 ## Structure
 
 | Path | What |
