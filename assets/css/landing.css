@@ -162,4 +162,9 @@ code { font-size: 15px; }
 @media (min-width: 768px) { .site-footer__grid { grid-template-columns: 2fr 1fr 1fr; } }
 @media (min-width: 1024px) { .site-footer { padding-block: var(--space-12); } }
 
-.checkout-stub { padding-block: var(--space-16); }
+.checkout { max-width: 40rem; padding-block: var(--space-16); }
+.checkout__demo, .checkout__note { color: var(--navy-600); }
+.checkout__summary { background: var(--white); border: 1px solid var(--line-200); border-radius: var(--radius-lg); padding: var(--space-6); margin-block: var(--space-6); }
+.checkout__price { font: 800 32px/40px var(--font-sans); color: var(--navy-900); }
+.checkout__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.checkout__actions .fc-btn[disabled] { opacity: 0.6; cursor: not-allowed; }

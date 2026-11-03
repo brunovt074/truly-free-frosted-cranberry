@@ -2,17 +2,18 @@
 
 Single-page offer landing for the Frosted Cranberry Everyday Cleaner + Aloe Hand Soap bundle (Good $14 · Better $24 · Best $39). Static HTML/CSS/JS, no UI framework, no Tailwind. Built strictly on the Frosted Cranberry design system (`tokens.json`, `bundle.css`, blueprint, SEO/GEO and handoff docs).
 
-- Live URL: _pending deploy_ (see **Deploy**).
+- Live URL: https://frosted-cranberry.72-60-247-32.sslip.io (deployed to the VPS by GitHub Actions on every push to `main`).
 - Screenshots: `screenshots/` (full page at 1440, 1024, 768 and 390 px).
-- Lighthouse mobile (local, Chrome 156, simulated slow 4G): Performance 99 · Accessibility 100 · Best Practices 100 · SEO 100. LCP 1.7 s, CLS 0.022, TBT 0 ms.
+- Lighthouse mobile (Chrome 156, simulated slow 4G): Performance 99-100 · Accessibility 100 · Best Practices 100 · SEO 100. LCP 1.7 s, CLS 0.02, TBT 0 ms.
 
 ## Run
 
 ```bash
 npm install
-npm run build      # regenerates index.html, checkout/index.html, robots.txt, sitemap.xml
+npm run build      # regenerates index.html, checkout/index.html, robots.txt, sitemap.xml, llms.txt
 npm run serve      # http://localhost:4173
-SITE_URL=https://your-domain npm run build   # sets canonical, og:url and JSON-LD URLs
+SITE_URL=https://your-domain GTM_ID=GTM-XXXX npm run build   # canonical, og:url, JSON-LD URLs; GTM_ID optional
+CHROME_PATH=/path/to/chrome npm test
 npm run images     # re-exports AVIF/WebP from the client zips (TF_ASSETS=<folder with both zips>)
 ```
 
@@ -38,7 +39,11 @@ Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOST
 | `assets/css/tokens.css` | Every custom property, generated from `tokens.json` |
 | `assets/css/components.css` | `bundle.css` ported 1:1 (only the extra button shadow removed: the DS allows two shadows) |
 | `assets/css/landing.css` | Page layout only, built from tokens |
-| `assets/js/main.js` | Offer selector, sticky bar, announcement rotation, before/after, analytics, reveal |
+| `assets/js/main.js` | Offer selector, sticky bar, announcement rotation, before/after, analytics, reveal, optional GTM loader |
+| `assets/js/checkout.js` | Shows the bundle chosen via `?bundle=` on the demo checkout |
+| `assets/css/fonts.css`, `assets/fonts/` | Self-hosted fonts |
+| `deploy/`, `Dockerfile`, `docker-compose.prod.yml` | nginx container + Traefik labels for the VPS |
+| `tests/landing.test.mjs` | Behavior, schema and accessibility tests |
 
 ## Design, UX and CRO decisions
 
@@ -83,4 +88,12 @@ Still open, shown as visible placeholders or left out:
 ## Not yet verified
 
 - Rich Results Test: JSON-LD parses and the FAQ matches the visible FAQ, but I did not run Google's tool (its Code tab accepts pasted HTML without a public URL, worth doing). No tier sells a single product, so the Everyday Cleaner and Aloe Hand Soap `Product` nodes carry no `offers` (a tier price would be wrong for them); only the bundle `Product` has the `AggregateOffer`. Google may warn that those two nodes lack `offers`.
-- Screen readers (VoiceOver/NVDA) were not run. Keyboard flow and Lighthouse accessibility (100) were checked.
+- Screen readers (VoiceOver/NVDA) were not run. Covered instead: full keyboard flow, Lighthouse accessibility 100, and axe-core (WCAG 2.2 AA + best practices) in `npm test` on landing 390/1440 and checkout.
+
+## Hardening and measurement
+
+- **Fonts are self-hosted** (Latin subset woff2, preloaded, `font-display: swap`): no third-party request, no render-blocking stylesheet. Merriweather 700 / 400 italic and Figtree 400-800 (one variable file).
+- **CSP** via `<meta>` (script hash computed at build for the single inline init script; JSON-LD is a data block and unaffected) plus `frame-ancestors`, `Permissions-Policy`, `nosniff` and `Referrer-Policy` headers in `deploy/nginx.conf`.
+- **GTM hook.** `GTM_ID=GTM-XXXX npm run build` adds the container loader and the matching CSP hosts; without it, nothing third-party loads and events stay in `window.dataLayer`. No ID is invented.
+- **`llms.txt`** summarizes the offer and the allowed facts for AI crawlers (Lighthouse agentic audit passes). `/checkout` is `Disallow`ed in `robots.txt`.
+- **Tests** (`npm test`, needs `CHROME_PATH`): Best preselected and CTA, tier order per breakpoint, `select_tier` event, per-product prices, FAQ vs JSON-LD parity, no `AggregateRating`, checkout bundle param, no horizontal overflow at 390/768/1024/1440, axe. CI runs them on every PR and checks generated files are committed.
