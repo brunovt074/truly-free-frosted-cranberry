@@ -20,11 +20,14 @@ Deploy the repo root as a static site (Vercel or Netlify, no build command neede
 
 ## Deploy to the VPS (GitHub Actions)
 
-`.github/workflows/deploy.yml` runs on push to `main` (or manually): `npm run build` with `SITE_URL`, rsync of `index.html`, `checkout/`, `assets/`, `robots.txt` and `sitemap.xml` to the VPS, then a smoke test.
+`.github/workflows/deploy.yml` runs on push to `main` (or manually). Same pattern as the other VPS projects: a Docker Compose project in `/opt/frosted-cranberry` behind the Easypanel Traefik (network `easypanel`, entrypoint `https`, resolver `letsencrypt`, via labels).
 
-Repository secrets: `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS` (`ssh-keyscan -H <host>`), `VPS_HOST`, `VPS_USER`.
-Repository variables: `SITE_URL` (public URL, no trailing slash), `VPS_DEPLOY_PATH` (default `/var/www/frosted-cranberry`).
-The VPS web server (nginx/Caddy) must serve that folder as the site root and map `/checkout` to `checkout/index.html`.
+1. `npm run build` with `SITE_URL`.
+2. rsync of the static site, `Dockerfile` (nginx), `deploy/nginx.conf` and `docker-compose.prod.yml` to the VPS.
+3. `docker compose up -d --build` with `SITE_HOST` taken from `SITE_URL`.
+4. Smoke test on `/` and `/checkout`.
+
+Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOSTS`, `VPS_HOST`, `VPS_USER`. Variables: `SITE_URL` (currently `https://frosted-cranberry.72-60-247-32.sslip.io`, no DNS needed; change it when a real domain points to the VPS) and `VPS_DEPLOY_PATH` (`/opt/frosted-cranberry`).
 
 ## Structure
 
