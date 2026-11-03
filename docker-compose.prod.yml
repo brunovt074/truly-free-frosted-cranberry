@@ -1,0 +1,21 @@
+name: frosted-cranberry
+services:
+  web:
+    build:
+      context: .
+    image: frosted-cranberry:latest
+    container_name: frosted-cranberry
+    restart: unless-stopped
+    networks:
+      - easypanel
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: easypanel
+      traefik.http.routers.frosted-cranberry.rule: "Host(`${SITE_HOST}`)"
+      traefik.http.routers.frosted-cranberry.entrypoints: https
+      traefik.http.routers.frosted-cranberry.tls: "true"
+      traefik.http.routers.frosted-cranberry.tls.certresolver: letsencrypt
+      traefik.http.services.frosted-cranberry.loadbalancer.server.port: "80"
+networks:
+  easypanel:
+    external: true
