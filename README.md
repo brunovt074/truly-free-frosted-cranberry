@@ -87,7 +87,7 @@ Still open, shown as visible placeholders or left out:
 
 ## Not yet verified
 
-- Rich Results Test: JSON-LD parses and the FAQ matches the visible FAQ, but I did not run Google's tool (its Code tab accepts pasted HTML without a public URL, worth doing). No tier sells a single product, so the Everyday Cleaner and Aloe Hand Soap `Product` nodes carry no `offers` (a tier price would be wrong for them); only the bundle `Product` has the `AggregateOffer`. Google may warn that those two nodes lack `offers`.
+- Structured data: validated on the live URL with validator.schema.org (0 errors, 0 warnings: Organization, WebPage, Product, FAQPage). Google's Rich Results Test was not run. No tier sells a single product, so the Everyday Cleaner and Aloe Hand Soap `Product` nodes carry no `offers` (a tier price would be wrong for them); only the bundle `Product` has the `AggregateOffer`. Google may warn that those two nodes lack `offers`.
 - Screen readers (VoiceOver/NVDA) were not run. Covered instead: full keyboard flow, Lighthouse accessibility 100, and axe-core (WCAG 2.2 AA + best practices) in `npm test` on landing 390/1440 and checkout.
 
 ## Hardening and measurement
