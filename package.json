@@ -1,0 +1,13 @@
+{
+  "name": "truly-free-frosted-cranberry",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "images": "node scripts/images.mjs",
+    "build": "node scripts/build.mjs",
+    "serve": "npx --yes serve -l 4173 ."
+  },
+  "devDependencies": {
+    "sharp": "^0.34.0"
+  }
+}

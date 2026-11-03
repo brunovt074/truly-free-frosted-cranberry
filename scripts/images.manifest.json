@@ -1,0 +1,127 @@
+{
+  "frosted-cranberry-hero-bundle-kitchen": {
+    "widths": [
+      640,
+      960,
+      1280,
+      1600
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-duo-water-flatlay": {
+    "widths": [
+      640,
+      960,
+      1254
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-everyday-cleaner-flatlay": {
+    "widths": [
+      640,
+      960,
+      1280,
+      1600
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-everyday-cleaner-refill-white": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-bundle-white": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-table-paint-before": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-table-paint-after": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-counter-pizza-before": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-counter-pizza-after": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-hands-paint-before": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-hands-paint-after": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-refill-step-1-fill": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-refill-step-2-pouch": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-refill-step-3-cap": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-made-without-little-hands": {
+    "widths": [
+      640,
+      960,
+      1080
+    ],
+    "ratio": 1
+  },
+  "frosted-cranberry-ugc-pizza-night": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1.3333
+  },
+  "frosted-cranberry-ugc-handwashing": {
+    "widths": [
+      640,
+      960
+    ],
+    "ratio": 1.3333
+  }
+}
