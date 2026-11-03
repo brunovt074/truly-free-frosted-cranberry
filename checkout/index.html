@@ -3,18 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-H/wy+XFbg/8mb13jOs/vovHahYQdQQY1XvW22EWG84o='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
 <meta name="robots" content="noindex">
-<title>Checkout placeholder | Truly Free Home</title>
+<title>Checkout (demo) | Truly Free Home</title>
 <link rel="icon" href="data:,">
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/frosted-cranberry-merriweather-normal-700.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/frosted-cranberry-figtree-variable.woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/landing.css">
 </head>
 <body>
-<main class="container checkout-stub">
-  <h1 class="t-h2">Checkout placeholder</h1>
-  <p>This page stands in for the real Truly Free Home checkout. The CTA sends the selected bundle in the <code>bundle</code> query parameter (<code>good</code>, <code>better</code> or <code>best</code>). Real variant IDs are pending from Truly Free.</p>
-  <p><a class="fc-btn fc-btn--secondary" href="/#offer">Back to the bundles</a></p>
+<main class="container checkout">
+  <h1 class="t-h2">Checkout</h1>
+  <p class="checkout__demo">Demo page. The real Truly Free Home checkout and variant IDs are pending, so payment is disabled here.</p>
+  <div id="checkout-summary">
+    <article class="checkout__summary" data-bundle="good" hidden>
+      <p class="t-eyebrow">Your bundle</p>
+      <h2 class="t-h3">Good · 2 products</h2>
+      <p>2 Everyday Cleaner</p>
+      <p class="checkout__price">$14 <span class="fc-tier__unit">$7.00 per product</span></p>
+      <p class="checkout__note">Shipping calculated at checkout · 30-day money-back guarantee</p>
+    </article>
+    <article class="checkout__summary" data-bundle="better" hidden>
+      <p class="t-eyebrow">Your bundle</p>
+      <h2 class="t-h3">Better · 4 products</h2>
+      <p>2 Everyday Cleaner + 2 Aloe Hand Soap</p>
+      <p class="checkout__price">$24 <span class="fc-tier__unit">$6.00 per product</span></p>
+      <p class="checkout__note">Shipping calculated at checkout · 30-day money-back guarantee</p>
+    </article>
+    <article class="checkout__summary" data-bundle="best">
+      <p class="t-eyebrow">Your bundle</p>
+      <h2 class="t-h3">Best · 10 products</h2>
+      <p>2 Everyday Cleaner + 2 Aloe Hand Soap, plus 3 + 3 free</p>
+      <p class="checkout__price">$39 <span class="fc-tier__unit">$3.90 per product</span></p>
+      <p class="checkout__note">Shipping calculated at checkout · 30-day money-back guarantee</p>
+    </article>
+  </div>
+  <p class="checkout__actions">
+    <button class="fc-btn fc-btn--primary" type="button" disabled>Pay securely (demo)</button>
+    <a class="fc-btn fc-btn--secondary" href="/#offer">Change bundle</a>
+  </p>
 </main>
+<script src="/assets/js/checkout.js" defer></script>
 </body>
 </html>

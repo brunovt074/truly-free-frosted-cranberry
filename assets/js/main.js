@@ -134,3 +134,12 @@ if (!reducedMotion.matches) {
   );
   document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
 }
+
+const gtmId = document.querySelector('meta[name="gtm-id"]')?.content;
+if (gtmId) {
+  window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
+  const gtm = document.createElement("script");
+  gtm.async = true;
+  gtm.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmId)}`;
+  document.head.appendChild(gtm);
+}

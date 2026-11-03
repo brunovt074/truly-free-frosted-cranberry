@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { createHash } from "node:crypto";
 
 const SITE = (process.env.SITE_URL ?? "https://frosted-cranberry.example.com").replace(/\/$/, "");
 const MODIFIED = "2026-11-03";
@@ -44,6 +45,24 @@ const BUNDLES = {
   best: { name: "Best", price: 39, products: 10, unit: "3.90", contents: "2 Everyday Cleaner + 2 Aloe Hand Soap, plus 3 + 3 free" },
 };
 const ctaLabel = (k) => `Get my ${BUNDLES[k].products} products — $${BUNDLES[k].price}`;
+
+const FONT_SERIF = "/assets/fonts/frosted-cranberry-merriweather-normal-700.woff2";
+const FONT_SANS = "/assets/fonts/frosted-cranberry-figtree-variable.woff2";
+const INIT_SCRIPT = `document.documentElement.classList.add("js");window.dataLayer=window.dataLayer||[];`;
+const GTM_ID = /^GTM-[A-Z0-9]+$/.test(process.env.GTM_ID ?? "") ? process.env.GTM_ID : "";
+const initHash = `'sha256-${createHash("sha256").update(INIT_SCRIPT).digest("base64")}'`;
+const gtmHosts = GTM_ID ? " https://www.googletagmanager.com https://www.google-analytics.com" : "";
+const CSP = [
+  "default-src 'self'",
+  `script-src 'self' ${initHash}${GTM_ID ? " https://www.googletagmanager.com" : ""}`,
+  "style-src 'self'",
+  `img-src 'self' data:${gtmHosts}`,
+  "font-src 'self'",
+  `connect-src 'self'${gtmHosts}${GTM_ID ? " https://region1.google-analytics.com" : ""}`,
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join("; ");
 
 const TRUST = [
   ["Plant-based", ICON.leaf],
@@ -185,7 +204,7 @@ const body = `
 </section>
 
 <section class="trust-band" aria-label="Product facts">
-  <ul class="fc-trust">
+  <ul class="fc-trust" tabindex="0">
     ${TRUST.map(([t, i]) => `<li>${i}${t}</li>`).join("")}
   </ul>
 </section>
@@ -324,7 +343,7 @@ const body = `
       <h2 class="t-h2" id="reviews-title">Families are making the switch</h2>
       <p class="fc-todo review-summary">[VERIFICAR: average rating and review count from the real review system. Nothing is shown until it exists.]</p>
     </div>
-    <div class="review-grid">
+    <div class="review-grid" tabindex="0" role="region" aria-label="Customer photos">
         ${review("ugc-pizza-night", "Customer photo: a mom and two kids making pizza at a kitchen counter", "Everyday Cleaner")}
         ${review("ugc-handwashing", "Customer photo: a mom helping two kids wash their hands at the kitchen sink", "Aloe Hand Soap")}
     </div>
@@ -488,6 +507,7 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="${CSP}">${GTM_ID ? `\n<meta name="gtm-id" content="${GTM_ID}">` : ""}
 <title>${esc(TITLE)}</title>
 <meta name="description" content="${esc(DESCRIPTION)}">
 <meta name="robots" content="index, follow">
@@ -507,14 +527,14 @@ const html = `<!doctype html>
 <meta name="twitter:title" content="${esc(TITLE)}">
 <meta name="twitter:description" content="${esc(DESCRIPTION)}">
 <meta name="twitter:image" content="${SITE}${IMG}${OG_IMAGE}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Merriweather:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link rel="preload" as="font" type="font/woff2" href="${FONT_SERIF}" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="${FONT_SANS}" crossorigin>
+<link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="preload" as="image" type="image/avif" imagesrcset="${manifest["frosted-cranberry-hero-bundle-kitchen"].widths.map((w) => `${IMG}frosted-cranberry-hero-bundle-kitchen-${w}.avif ${w}w`).join(", ")}" imagesizes="(min-width:1024px) 560px, calc(100vw - 32px)" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/landing.css">
-<script>document.documentElement.classList.add("js");window.dataLayer=window.dataLayer||[];</script>
+<script>${INIT_SCRIPT}</script>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 </head>
 <body>${body}
@@ -525,6 +545,18 @@ const html = `<!doctype html>
 
 writeFileSync("index.html", html);
 
+const checkoutCards = Object.entries(BUNDLES)
+  .map(
+    ([key, b]) => `<article class="checkout__summary" data-bundle="${key}"${key === "best" ? "" : " hidden"}>
+      <p class="t-eyebrow">Your bundle</p>
+      <h2 class="t-h3">${b.name} · ${b.products} products</h2>
+      <p>${b.contents}</p>
+      <p class="checkout__price">$${b.price} <span class="fc-tier__unit">$${b.unit} per product</span></p>
+      <p class="checkout__note">Shipping calculated at checkout · 30-day money-back guarantee</p>
+    </article>`,
+  )
+  .join("\n    ");
+
 mkdirSync("checkout", { recursive: true });
 writeFileSync(
   "checkout/index.html",
@@ -533,25 +565,43 @@ writeFileSync(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="${CSP}">
 <meta name="robots" content="noindex">
-<title>Checkout placeholder | Truly Free Home</title>
+<title>Checkout (demo) | Truly Free Home</title>
 <link rel="icon" href="data:,">
+<link rel="preload" as="font" type="font/woff2" href="${FONT_SERIF}" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="${FONT_SANS}" crossorigin>
+<link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/landing.css">
 </head>
 <body>
-<main class="container checkout-stub">
-  <h1 class="t-h2">Checkout placeholder</h1>
-  <p>This page stands in for the real Truly Free Home checkout. The CTA sends the selected bundle in the <code>bundle</code> query parameter (<code>good</code>, <code>better</code> or <code>best</code>). Real variant IDs are pending from Truly Free.</p>
-  <p><a class="fc-btn fc-btn--secondary" href="/#offer">Back to the bundles</a></p>
+<main class="container checkout">
+  <h1 class="t-h2">Checkout</h1>
+  <p class="checkout__demo">Demo page. The real Truly Free Home checkout and variant IDs are pending, so payment is disabled here.</p>
+  <div id="checkout-summary">
+    ${checkoutCards}
+  </div>
+  <p class="checkout__actions">
+    <button class="fc-btn fc-btn--primary" type="button" disabled>Pay securely (demo)</button>
+    <a class="fc-btn fc-btn--secondary" href="/#offer">Change bundle</a>
+  </p>
 </main>
+<script src="/assets/js/checkout.js" defer></script>
 </body>
 </html>
 `,
 );
 
-writeFileSync("robots.txt", `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
+writeFileSync("robots.txt", `User-agent: *\nAllow: /\nDisallow: /checkout\n\nSitemap: ${SITE}/sitemap.xml\n`);
+writeFileSync(
+  "llms.txt",
+  `# Truly Free Home · Frosted Cranberry bundle\n\n> Plant-based cleaner and hand soap bundle from Truly Free Home, made in Michigan. Holiday 2026 scent.\n\n## Offer\n${Object.values(BUNDLES)
+    .map((b) => `- ${b.name}: ${b.products} products (${b.contents}) for $${b.price}, $${b.unit} per product`)
+    .join("\n")}\n\n## Facts\n- ZERO toxic chemicals; ammonia-free and chlorine-free; dye-free; cruelty-free; plant-based.\n- 10x concentrated aloe vera; works on hundreds of surfaces; refillable.\n- 30-day money-back guarantee; no subscription.\n- Support: 231-944-1716, Mon-Fri 9AM-9PM EST.\n\n## Links\n- [Frosted Cranberry bundle](${SITE}/)\n- [Privacy policy](https://my4.trulyfreehome.com/pages/privacy-policy)\n- [Terms of service](https://my4.trulyfreehome.com/pages/terms-of-service)\n`,
+);
+
 writeFileSync(
   "sitemap.xml",
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${SITE}/</loc><lastmod>${MODIFIED}</lastmod></url></urlset>\n`,
