@@ -42,7 +42,7 @@ const ICON = {
 const BUNDLES = {
   good: { name: "Good", price: 14, products: 2, unit: "7.00", contents: "2 Everyday Cleaner" },
   better: { name: "Better", price: 24, products: 4, unit: "6.00", contents: "2 Everyday Cleaner + 2 Aloe Hand Soap" },
-  best: { name: "Best", price: 39, products: 10, unit: "3.90", contents: "2 Everyday Cleaner + 2 Aloe Hand Soap, plus 3 + 3 free" },
+  best: { name: "Best", price: 39, products: 10, unit: "3.90", contents: "2 Everyday Cleaner + 2 Aloe Hand Soap + 3 of each free" },
 };
 const ctaLabel = (k) => `Get my ${BUNDLES[k].products} products — $${BUNDLES[k].price}`;
 
@@ -85,16 +85,6 @@ const TRACKING_METAS = [
   .filter(Boolean)
   .join("");
 const PRIVACY_URL = "https://my4.trulyfreehome.com/pages/privacy-policy";
-const CONSENT_BAR = TRACKING
-  ? `<div class="consent" id="consent" role="region" aria-label="Analytics preferences" hidden>
-  <p class="consent__text">We use analytics cookies to see how this page is used and to improve it. <a href="${PRIVACY_URL}">Privacy policy</a></p>
-  <div class="consent__actions">
-    <button class="fc-btn fc-btn--secondary fc-btn--sm" type="button" data-consent="denied">Decline</button>
-    <button class="fc-btn fc-btn--secondary fc-btn--sm" type="button" data-consent="granted">Accept</button>
-  </div>
-</div>`
-  : "";
-const PREFS_BUTTON = TRACKING ? `<br><button class="site-footer__link" type="button" data-consent-open>Analytics preferences</button>` : "";
 
 const TRUST = [
   ["Plant-based", ICON.leaf],
@@ -187,8 +177,7 @@ const step = (key, alt, text) => `<li>${pic(key, { sizes: "(min-width:1024px) 38
 const review = (key, alt, who) => `<article class="fc-review">
           ${pic(key, { sizes: "(min-width:1024px) 420px, 85vw", alt, cls: "fc-review__photo" })}
           <div class="fc-review__body">
-            <p class="fc-review__text fc-todo">[VERIFICAR: real customer review text, copied from the live offer or review system]</p>
-            <div class="fc-review__who fc-todo">[VERIFICAR: reviewer name and rating]<span>${esc(who)}</span></div>
+            <div class="fc-review__who">${esc(who)}</div>
           </div>
         </article>`;
 
@@ -215,7 +204,6 @@ const renderBody = (variant) => {
   const V = VARIANTS[variant];
   return `
 <a class="skip" href="#main">Skip to main content</a>
-${CONSENT_BAR}
 
 <div class="fc-announce" role="region" aria-label="Offer" id="announce">
   <span class="fc-announce__msg is-active"><strong>Holiday bundle: buy 4, get 6 free</strong></span><span class="fc-announce__sep"></span><span class="fc-announce__msg">Orders before 3 PM EST ship the same day</span>
@@ -227,7 +215,7 @@ ${CONSENT_BAR}
     <a class="wordmark" href="/" aria-label="Truly Free Home">Truly Free Home</a>
     <div class="site-header__side">
       <span class="fc-muted t-small site-header__phone">Questions? <a href="tel:+12319441716">231-944-1716</a></span>
-      <a class="fc-btn fc-btn--secondary fc-btn--sm" href="#offer">Shop the bundle</a>
+      <a class="fc-btn fc-btn--secondary fc-btn--sm" href="#bundles">Shop the bundle</a>
     </div>
   </div>
 </header>
@@ -241,7 +229,7 @@ ${CONSENT_BAR}
       <h1 class="t-display" id="hero-title">${esc(V.h1)}</h1>
       <p class="t-lead hero__lead">Frosted Cranberry Everyday Cleaner and Aloe Hand Soap — plant-powered, refillable and made in Michigan for homes with little helpers.</p>
       <div class="hero__cta">
-        <a class="fc-btn fc-btn--primary" id="hero-cta" href="#offer">Choose my bundle</a>
+        <a class="fc-btn fc-btn--primary" id="hero-cta" href="#bundles">Choose my bundle</a>
         <span class="fc-btn__note">From $3.90 per product · 30-day money-back guarantee</span>
       </div>
       <ul class="fc-trust fc-trust--compact hero__bullets">
@@ -269,7 +257,7 @@ ${CONSENT_BAR}
     </div>
     <fieldset class="offer-fieldset">
       <legend class="sr-only">Choose your bundle</legend>
-      <div class="fc-offer">
+      <div class="fc-offer" id="bundles">
       ${tier("good", {
         imgKey: "everyday-cleaner-refill-white",
         imgAlt: "Truly Free Home Frosted Cranberry Everyday Cleaner bottle next to its refill pouch on a white background",
@@ -334,7 +322,7 @@ ${CONSENT_BAR}
           <ul class="fc-tier__list">${li("10x concentrated aloe vera")}${li("Softer, cleaner hands with every wash")}${li("Gentle foam kids actually like using")}</ul>
         </div>
       </div>
-      <a class="fc-btn fc-btn--link" href="#offer">See bundles →</a>
+      <a class="fc-btn fc-btn--link" href="#bundles">See bundles →</a>
     </div>
   </div>
 </section>
@@ -393,7 +381,6 @@ ${CONSENT_BAR}
     <div class="section__head">
       <p class="t-eyebrow">Reviews</p>
       <h2 class="t-h2" id="reviews-title">Families are making the switch</h2>
-      <p class="fc-todo review-summary">[VERIFICAR: average rating and review count from the real review system. Nothing is shown until it exists.]</p>
     </div>
     <div class="review-grid" tabindex="0" role="region" aria-label="Customer photos">
         ${review("ugc-pizza-night", "Customer photo: a mom and two kids making pizza at a kitchen counter", "Everyday Cleaner")}
@@ -446,7 +433,7 @@ ${CONSENT_BAR}
       <p><strong>Customer support</strong><br><a href="tel:+12319441716">231-944-1716</a><br>Mon–Fri 9AM–9PM EST</p>
     </div>
     <div>
-      <p><a href="https://my4.trulyfreehome.com/pages/privacy-policy">Privacy Policy</a><br><a href="https://my4.trulyfreehome.com/pages/terms-of-service">Terms of Service</a>${PREFS_BUTTON}</p>
+      <p><a href="https://my4.trulyfreehome.com/pages/privacy-policy">Privacy Policy</a><br><a href="https://my4.trulyfreehome.com/pages/terms-of-service">Terms of Service</a></p>
     </div>
   </div>
   <p class="container site-footer__legal">© 2026 Truly Free Home, Inc. All rights reserved. Made in Michigan.</p>
@@ -636,14 +623,15 @@ writeFileSync(
 <body>
 <main class="container checkout">
   <h1 class="t-h2">Checkout</h1>
-  <p class="checkout__demo">Demo page. The real Truly Free Home checkout and variant IDs are pending, so payment is disabled here.</p>
+  <p class="checkout__demo">Demo page. The real Truly Free Home checkout and variant IDs are pending, so no payment is taken.</p>
   <div id="checkout-summary">
     ${checkoutCards}
   </div>
   <p class="checkout__actions">
-    <button class="fc-btn fc-btn--primary" type="button" disabled>Pay securely (demo)</button>
-    <a class="fc-btn fc-btn--secondary" href="/#offer">Change bundle</a>
+    <button class="fc-btn fc-btn--primary" type="button" id="pay">Pay securely (demo)</button>
+    <a class="fc-btn fc-btn--secondary" href="/#bundles">Change bundle</a>
   </p>
+  <p class="checkout__status" id="pay-status" role="status" aria-live="polite"></p>
 </main>
 <script src="/assets/js/checkout.js" defer></script>
 </body>
