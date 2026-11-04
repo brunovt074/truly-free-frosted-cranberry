@@ -274,6 +274,8 @@ test("GTM takes over and GA4 and Clarity ids are ignored", async () => {
   await page.waitForNetworkIdle();
   assert.deepEqual(hits, ["https://www.googletagmanager.com/gtm.js?id=GTM-TEST123"]);
   assert.deepEqual(errors, []);
+  const csp = await page.$eval('meta[http-equiv="Content-Security-Policy"]', (m) => m.content);
+  assert.ok(csp.includes("https://scripts.clarity.ms") && csp.includes("https://*.clarity.ms") && csp.includes("https://c.bing.com"));
   await page.close();
 });
 

@@ -18,5 +18,6 @@
 - Deploy to the VPS as an nginx container behind Easypanel Traefik, via GitHub Actions.
 
 ### Changed
+- With `GTM_ID`, the CSP also allows Clarity hosts so a Clarity tag inside the container is not blocked.
 - Fonts are self-hosted (woff2) instead of loaded from Google Fonts.
 - Carousels that scroll horizontally on mobile are keyboard-focusable.

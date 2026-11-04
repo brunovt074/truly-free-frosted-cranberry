@@ -58,8 +58,8 @@ const TRACKING = Boolean(GTM_ID || GA4_ID || CLARITY_ID);
 const initHash = `'sha256-${createHash("sha256").update(INIT_SCRIPT).digest("base64")}'`;
 const googleScript = GTM_ID || GA4_ID ? ["https://www.googletagmanager.com"] : [];
 const googleNet = GTM_ID || GA4_ID ? ["https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com"] : [];
-const clarityScript = CLARITY_ID ? ["https://www.clarity.ms", "https://scripts.clarity.ms"] : [];
-const clarityNet = CLARITY_ID ? ["https://*.clarity.ms", "https://c.bing.com"] : [];
+const clarityScript = CLARITY_ID || GTM_ID ? ["https://www.clarity.ms", "https://scripts.clarity.ms"] : [];
+const clarityNet = CLARITY_ID || GTM_ID ? ["https://*.clarity.ms", "https://c.bing.com"] : [];
 const sources = (...lists) => lists.flat().map((h) => ` ${h}`).join("");
 const CSP = [
   "default-src 'self'",
