@@ -280,6 +280,12 @@ test("the sticky buy bar yields to the consent bar and returns after the choice"
   await page.close();
 });
 
+test("a malformed tracking id fails the build instead of silently disabling tracking", async () => {
+  for (const env of [{ GA4_ID: "G-TEST12345 " }, { CLARITY_ID: "Test12345a" }, { GTM_ID: "gtm-test123" }]) {
+    await assert.rejects(buildWith(env), (error) => error.stderr.includes("does not match"), JSON.stringify(env));
+  }
+});
+
 test("GTM takes over and GA4 and Clarity ids are ignored", async () => {
   const { url } = await buildWith({ GTM_ID: "GTM-TEST123", GA4_ID: "G-TEST12345", CLARITY_ID: "test12345a" });
   const { page, errors, hits } = await openTracked(url);
