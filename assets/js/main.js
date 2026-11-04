@@ -1,5 +1,5 @@
-const dataLayer = (window.dataLayer = window.dataLayer || []);
-const track = (event, params = {}) => dataLayer.push({ event, ...params });
+import { track } from "./analytics.js";
+
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 const buy = document.getElementById("buy");
@@ -47,7 +47,7 @@ document.addEventListener("click", (e) => {
   if (!cta) return;
   const tier = cta.dataset.tier;
   const price = Number(document.querySelector(`input[value="${tier}"]`).dataset.price);
-  track("begin_checkout", { tier, price, cta_location: cta.dataset.cta });
+  track("begin_checkout", { tier, price, value: price, currency: "USD", cta_location: cta.dataset.cta });
 });
 
 const announce = document.getElementById("announce");
@@ -133,13 +133,4 @@ if (!reducedMotion.matches) {
     { threshold: 0.08 },
   );
   document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
-}
-
-const gtmId = document.querySelector('meta[name="gtm-id"]')?.content;
-if (gtmId) {
-  window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
-  const gtm = document.createElement("script");
-  gtm.async = true;
-  gtm.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmId)}`;
-  document.head.appendChild(gtm);
 }

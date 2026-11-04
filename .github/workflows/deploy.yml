@@ -53,7 +53,7 @@ jobs:
       - name: Stage site
         run: |
           mkdir -p stage/site stage/deploy
-          cp -r index.html robots.txt sitemap.xml llms.txt checkout assets stage/site/
+          cp -r index.html robots.txt sitemap.xml llms.txt checkout v1 v2 assets stage/site/
           cp Dockerfile docker-compose.prod.yml .dockerignore stage/
           cp deploy/nginx.conf deploy/security-headers.conf stage/deploy/
       - name: Sync to VPS
