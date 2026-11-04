@@ -18,6 +18,7 @@
 - Deploy to the VPS as an nginx container behind Easypanel Traefik, via GitHub Actions.
 
 ### Changed
+- The deploy workflow passes `GTM_ID`, `GA4_ID` and `CLARITY_ID` repository variables to the build, so tracking can be switched on without a code change.
 - A malformed `GTM_ID`, `GA4_ID` or `CLARITY_ID` now fails the build instead of silently disabling tracking.
 - Clarity consent signal is sent after the tag stub exists, so it is no longer dropped; the sticky buy bar hides while the consent bar is open.
 - With `GTM_ID`, the CSP also allows Clarity hosts so a Clarity tag inside the container is not blocked.
