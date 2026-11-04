@@ -41,7 +41,7 @@ Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOST
 | `assets/css/components.css` | `bundle.css` ported 1:1 (only the extra button shadow removed: the DS allows two shadows) |
 | `assets/css/landing.css` | Page layout only, built from tokens |
 | `assets/js/main.js` | Offer selector, sticky bar, announcement rotation, before/after, reveal |
-| `assets/js/analytics.js` | `track()`, GTM / GA4 / Clarity loaders, scroll depth, phone clicks |
+| `assets/js/analytics.js` | `track()`, consent bar, GTM / GA4 / Clarity loaders, scroll depth, phone clicks |
 | `assets/js/checkout.js` | Shows the bundle chosen via `?bundle=` on the demo checkout |
 | `assets/css/fonts.css`, `assets/fonts/` | Self-hosted fonts |
 | `v1/`, `v2/` | Generated A/B variants (hero photo, H1) |
@@ -57,7 +57,7 @@ Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOST
 - **Order flips on mobile.** Desktop reads Good, Better, Best left to right. Below 768 px the stack is Best, Better, Good so the high anchor comes first. `main.js` also reorders the DOM at that breakpoint so arrow-key and tab order match what is on screen.
 - **Mobile hero.** Photo cropped 4:3 (keeps the full width of the product line), copy and CTA below. The CTA ends at y=739 on a 390x844 viewport, so it is visible without scrolling. Bullets come after the CTA on mobile.
 - **Color discipline.** Light grounds dominate, navy for ink and small marks, cranberry only for the CTA, prices and the final band. The footer is navy so the final cranberry band is never stacked against another cranberry block.
-- **No invented proof.** No stars, review text, names, family count, certifications or struck-through prices. The review band shows only the two real customer photos, captioned with the product, so nothing on the page is a placeholder.
+- **No invented proof.** No stars, review text, names, family count, certifications or struck-through prices. Reviews show real customer photos with explicit placeholders for the text.
 - **Motion.** One fade + 12 px rise (200 ms, once) on sections below the hero, none under `prefers-reduced-motion`. No parallax, snow, confetti, countdowns or gradients.
 - **Accessibility.** Native radios in a `fieldset`, `input type=range` for the sliders, `details/summary` FAQ, 2 px focus ring (white on dark), `inert` on the sticky bar while hidden, skip link, descriptive `alt`.
 
@@ -77,11 +77,11 @@ Facts taken from the live offer page `my4.trulyfreehome.com/offers/fc-feg-b4g6-v
 - 30-day money-back guarantee wording and "no subscription required" (guarantee, FAQ, tier footnote).
 - FAQ line that the non-toxic formula is safe around pets.
 
-Still open, left out of the page until the real data exists:
+Still open, shown as visible placeholders or left out:
 
 - **Official logo SVG.** Wordmark "Truly Free Home" in Merriweather 700 with a `TODO` comment in the header. No Organization `logo` in the schema.
 - **Shipping per tier.** Cards and table say "Shipping calculated at checkout". The sibling page shows $4.95 on lower tiers and free on the top tier, unconfirmed here. No `shippingRate` in the schema.
-- **Reviews.** Review text, names, ratings and the rating summary are not rendered. The band keeps the two real customer photos with a product caption, and `AggregateRating` is omitted until real reviews exist.
+- **Reviews.** Review text, names, ratings and the rating summary are dashed `[VERIFICAR]` boxes. `AggregateRating` is omitted until real reviews exist.
 - **Families count.** Omitted: the sources disagree (598,000 vs 648,000).
 - **"Limited" scent claim.** The blueprint's "Limited holiday scent" / "limited batch" is replaced by "Holiday 2026", since limited stock is unconfirmed.
 - **Bundle contents.** Whether units are refill pouches or bottles, and whether Best includes reusable bottles. The FAQ only states that both products are refillable.
@@ -98,6 +98,6 @@ Still open, left out of the page until the real data exists:
 
 - **Fonts are self-hosted** (Latin subset woff2, preloaded, `font-display: swap`): no third-party request, no render-blocking stylesheet. Merriweather 700 / 400 italic and Figtree 400-800 (one variable file).
 - **CSP** via `<meta>` (script hash computed at build for the single inline init script; JSON-LD is a data block and unaffected) plus `frame-ancestors`, `Permissions-Policy`, `nosniff` and `Referrer-Policy` headers in `deploy/nginx.conf`.
-- **Analytics and experiments.** GA4, Tag Manager and Microsoft Clarity are wired but off until IDs are provided at build (`GTM_ID`, or `GA4_ID` and `CLARITY_ID`). They load on arrival, the way the brand's current site does, with Consent Mode v2 set to analytics granted and ads denied, and the CSP opens only the hosts in use. No ID is invented. A visitor in the EU or the UK gets analytics without being asked, which the production setup would have to change with geolocation. A/B variants `/v1/` (hero photo) and `/v2/` (H1) are built from the same generator. Full detail, event taxonomy, sample-size table and what Clarity would answer: [`docs/measurement-and-experiments.md`](docs/measurement-and-experiments.md).
+- **Analytics, consent and experiments.** GA4, Tag Manager and Microsoft Clarity are wired but off until IDs are provided at build (`GTM_ID`, or `GA4_ID` and `CLARITY_ID`). They load only after the visitor accepts, with Consent Mode v2, and the CSP opens only the hosts in use. No ID is invented. A/B variants `/v1/` (hero photo) and `/v2/` (H1) are built from the same generator. Full detail, event taxonomy, sample-size table and what Clarity would answer: [`docs/measurement-and-experiments.md`](docs/measurement-and-experiments.md).
 - **`llms.txt`** summarizes the offer and the allowed facts for AI crawlers (Lighthouse agentic audit passes). `/checkout` is `Disallow`ed in `robots.txt`.
-- **Tests** (`npm test`, needs `CHROME_PATH`, 20 cases): Best preselected and CTA, tier order per breakpoint, `select_tier` event, per-product prices, FAQ vs JSON-LD parity, no `AggregateRating`, checkout bundle param, variants (hero, H1, shared canonical, sitemap), `variant`/`value`/`currency` on events, trackers loading on arrival with ads denied, the hero CTA landing on the cards with their prices in view, the copied phone confirmation, the demo payment progress state, no placeholder markers in any built page, CSP does not block GA4/Clarity/GTM, no horizontal overflow at 390/768/1024/1440, axe (landing, checkout, variants). CI runs them on every PR and checks generated files are committed.
+- **Tests** (`npm test`, needs `CHROME_PATH`, 16 cases): Best preselected and CTA, tier order per breakpoint, `select_tier` event, per-product prices, FAQ vs JSON-LD parity, no `AggregateRating`, checkout bundle param, variants (hero, H1, shared canonical, sitemap), `variant`/`value`/`currency` on events, consent flow (nothing third-party before Accept, CSP does not block GA4/Clarity/GTM), no horizontal overflow at 390/768/1024/1440, axe (landing, checkout, variants, consent bar open). CI runs them on every PR and checks generated files are committed.

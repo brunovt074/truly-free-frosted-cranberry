@@ -1,6 +1,6 @@
 # Measurement and experiments
 
-No tracking IDs were provided, so the page ships with the hooks and loads nothing third-party until IDs are set at build time.
+No tracking IDs were provided, so the page ships with the hooks and loads nothing third-party until IDs are set at build time and the visitor accepts analytics.
 
 ## Turning tools on
 
@@ -16,10 +16,9 @@ SITE_URL=https://example.com GA4_ID=G-XXXX CLARITY_ID=xxxxxxxxxx npm run build
 
 - The CSP is built from the same variables, so only the hosts of the tools in use are allowed. With `GTM_ID` the Google and Clarity hosts are both allowed, because tags added inside the container are invisible to the build.
 - GTM "Custom HTML" tags are inline script and cannot be hashed at build time, so the CSP blocks them. Use the native GA4 tag and the Clarity template from the Community Template Gallery instead.
-- No consent banner. The page follows the brand's current site, which does not ask before analytics, so the tools load on arrival. Google Consent Mode v2 is set with `analytics_storage` granted and `ad_storage`, `ad_user_data` and `ad_personalization` denied, so analytics runs and advertising does not. Clarity receives `consentv2` with analytics granted and ads denied.
-- Trade-off: a visitor in the EU or the UK gets analytics cookies without being asked, which GDPR would not allow. The production refinement is to ask only there and keep the opt-out model elsewhere; that needs geolocation and is not implemented.
-- Reported traffic is close to real traffic, because no visitor is turned away. It still misses ad blockers and browsers that block Google Analytics. Behavioral modeling in GA4 needs sustained volume (about 1,000 events per day for 7 days with storage denied) and is not a factor at this scale.
-- Not verified with real IDs at build time. The GA4 path was checked once against the live page with a real measurement ID: no third-party request before any interaction, then `gtag/js` 200, `/g/collect` 204 and the `_ga` cookies. Clarity was only checked against a simulated stub.
+- Consent: a bar with equal-weight Decline / Accept buttons appears only when a tool is configured. Choice is stored in `localStorage` (`fc_consent`), and "Analytics preferences" in the footer reopens it. Google Consent Mode v2 defaults are sent as `denied` and updated on accept; Clarity receives `consentv2`.
+- Trade-off: because nothing loads before consent, reported traffic is lower than real traffic. That is the price of not setting cookies without permission.
+- Not verified with real IDs. The test suite proves the right scripts are requested, only after Accept, and that the CSP does not block them. It does not prove that GA4 or Clarity accept the data.
 
 ## Event taxonomy
 

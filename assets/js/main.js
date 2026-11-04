@@ -134,23 +134,3 @@ if (!reducedMotion.matches) {
   );
   document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
 }
-
-const touch = matchMedia("(pointer: coarse)");
-document.querySelectorAll('a[href^="tel:"]').forEach((link) =>
-  link.addEventListener("click", async (e) => {
-    if (touch.matches || !navigator.clipboard) return;
-    e.preventDefault();
-    try {
-      await navigator.clipboard.writeText(link.textContent.trim());
-    } catch {
-      location.href = link.href;
-      return;
-    }
-    const chip = document.createElement("span");
-    chip.className = "phone-copy";
-    chip.setAttribute("role", "status");
-    chip.textContent = "Number copied";
-    link.after(chip);
-    setTimeout(() => chip.remove(), 1800);
-  }),
-);

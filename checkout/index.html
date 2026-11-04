@@ -17,7 +17,7 @@
 <body>
 <main class="container checkout">
   <h1 class="t-h2">Checkout</h1>
-  <p class="checkout__demo">Demo page. The real Truly Free Home checkout and variant IDs are pending, so no payment is taken.</p>
+  <p class="checkout__demo">Demo page. The real Truly Free Home checkout and variant IDs are pending, so payment is disabled here.</p>
   <div id="checkout-summary">
     <article class="checkout__summary" data-bundle="good" hidden>
       <p class="t-eyebrow">Your bundle</p>
@@ -36,16 +36,15 @@
     <article class="checkout__summary" data-bundle="best">
       <p class="t-eyebrow">Your bundle</p>
       <h2 class="t-h3">Best · 10 products</h2>
-      <p>2 Everyday Cleaner + 2 Aloe Hand Soap + 3 of each free</p>
+      <p>2 Everyday Cleaner + 2 Aloe Hand Soap, plus 3 + 3 free</p>
       <p class="checkout__price">$39 <span class="fc-tier__unit">$3.90 per product</span></p>
       <p class="checkout__note">Shipping calculated at checkout · 30-day money-back guarantee</p>
     </article>
   </div>
   <p class="checkout__actions">
-    <button class="fc-btn fc-btn--primary" type="button" id="pay">Pay securely (demo)</button>
-    <a class="fc-btn fc-btn--secondary" href="/#bundles">Change bundle</a>
+    <button class="fc-btn fc-btn--primary" type="button" disabled>Pay securely (demo)</button>
+    <a class="fc-btn fc-btn--secondary" href="/#offer">Change bundle</a>
   </p>
-  <p class="checkout__status" id="pay-status" role="status" aria-live="polite"></p>
 </main>
 <script src="/assets/js/checkout.js" defer></script>
 </body>
