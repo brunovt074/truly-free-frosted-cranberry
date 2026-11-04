@@ -1,0 +1,10 @@
+/* Demo checkout: pay button explanation. Load after landing.css. */
+.checkout__actions .fc-btn.is-demo { cursor: help; }
+.checkout__pay-status:empty { display: none; }
+.checkout__pay-status { margin-top: var(--space-4); padding: var(--space-4) var(--space-6); background: var(--blush-100); color: var(--navy-900); border: 2px solid var(--cranberry-700); border-radius: var(--radius-lg); }
+.checkout__pay-status p { margin: 0; }
+.checkout__pay-status .checkout__pay-title { font-weight: 800; margin-bottom: var(--space-2); }
+@media (prefers-reduced-motion: no-preference) {
+  .checkout__pay-status.is-shown { animation: pay-note-in .25s ease-out; }
+  @keyframes pay-note-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}

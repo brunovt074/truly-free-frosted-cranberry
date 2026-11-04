@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /checkout
 
-Sitemap: https://frosted-cranberry.example.com/sitemap.xml
+Sitemap: https://frosted-cranberry.brunodev.store/sitemap.xml

@@ -12,12 +12,13 @@
 <link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/components.css">
-<link rel="stylesheet" href="/assets/css/landing.css">
+<link rel="stylesheet" href="/assets/css/landing.css?v=3">
+<link rel="stylesheet" href="/assets/css/checkout.css">
 </head>
 <body>
 <main class="container checkout">
   <h1 class="t-h2">Checkout</h1>
-  <p class="checkout__demo">Demo page. The real Truly Free Home checkout and variant IDs are pending, so payment is disabled here.</p>
+  <p class="checkout__demo">Demo page. The real Truly Free Home checkout is not connected; no payment will be taken.</p>
   <div id="checkout-summary">
     <article class="checkout__summary" data-bundle="good" hidden>
       <p class="t-eyebrow">Your bundle</p>
@@ -42,7 +43,7 @@
     </article>
   </div>
   <p class="checkout__actions">
-    <button class="fc-btn fc-btn--primary" type="button" disabled>Pay securely (demo)</button>
+    <button class="fc-btn fc-btn--primary" type="button" data-demo-pay>Pay securely (demo)</button>
     <a class="fc-btn fc-btn--secondary" href="/#offer">Change bundle</a>
   </p>
 </main>

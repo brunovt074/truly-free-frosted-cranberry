@@ -2,7 +2,7 @@
 
 Single-page offer landing for the Frosted Cranberry Everyday Cleaner + Aloe Hand Soap bundle (Good $14 · Better $24 · Best $39). Static HTML/CSS/JS, no UI framework, no Tailwind. Built strictly on the Frosted Cranberry design system (`tokens.json`, `bundle.css`, blueprint, SEO/GEO and handoff docs).
 
-- Live URL: https://frosted-cranberry.72-60-247-32.sslip.io (deployed to the VPS by GitHub Actions on every push to `main`).
+- Live URL: https://frosted-cranberry.brunodev.store (deployed to the VPS by GitHub Actions on every push to `main`).
 - Screenshots: `screenshots/` (full page at 1440, 1024, 768 and 390 px).
 - Lighthouse mobile (Chrome 156, simulated slow 4G): Performance 99-100 · Accessibility 100 · Best Practices 100 · SEO 100. LCP 1.7 s, CLS 0.02, TBT 0 ms.
 
@@ -13,7 +13,6 @@ npm install
 npm run build      # regenerates index.html, checkout/index.html, robots.txt, sitemap.xml, llms.txt
 npm run serve      # http://localhost:4173
 SITE_URL=https://your-domain npm run build   # canonical, og:url, JSON-LD URLs
-GTM_ID=GTM-XXXX npm run build                 # or GA4_ID=G-XXXX CLARITY_ID=xxxxxxxxxx; optional
 CHROME_PATH=/path/to/chrome npm test
 npm run images     # re-exports AVIF/WebP from the client zips (TF_ASSETS=<folder with both zips>)
 ```
@@ -29,7 +28,7 @@ Deploy the repo root as a static site (Vercel or Netlify, no build command neede
 3. `docker compose up -d --build` with `SITE_HOST` taken from `SITE_URL`.
 4. Smoke test on `/` and `/checkout`.
 
-Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOSTS`, `VPS_HOST`, `VPS_USER`. Variables: `SITE_URL` (currently `https://frosted-cranberry.72-60-247-32.sslip.io`, no DNS needed; change it when a real domain points to the VPS) and `VPS_DEPLOY_PATH` (`/opt/frosted-cranberry`).
+Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOSTS`, `VPS_HOST`, `VPS_USER`. Variables: `SITE_URL` (`https://frosted-cranberry.brunodev.store`) and `VPS_DEPLOY_PATH` (`/opt/frosted-cranberry`). The legacy `sslip.io` address redirects to the new domain, preserving paths and query strings; clients must still be able to resolve the legacy hostname.
 
 ## Structure
 
@@ -41,7 +40,7 @@ Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOST
 | `assets/css/components.css` | `bundle.css` ported 1:1 (only the extra button shadow removed: the DS allows two shadows) |
 | `assets/css/landing.css` | Page layout only, built from tokens |
 | `assets/js/main.js` | Offer selector, sticky bar, announcement rotation, before/after, reveal |
-| `assets/js/analytics.js` | `track()`, consent bar, GTM / GA4 / Clarity loaders, scroll depth, phone clicks |
+| `assets/js/analytics.js` | In-memory `dataLayer` events; no third-party trackers |
 | `assets/js/checkout.js` | Shows the bundle chosen via `?bundle=` on the demo checkout |
 | `assets/css/fonts.css`, `assets/fonts/` | Self-hosted fonts |
 | `v1/`, `v2/` | Generated A/B variants (hero photo, H1) |
@@ -52,12 +51,14 @@ Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOST
 ## Design, UX and CRO decisions
 
 - **Offer early.** Traffic to an offer page is warm (email, ads), so the selector sits right after the hero and trust row, and "Shop the bundle" in the header plus the mobile sticky bar keep it one tap away. Everything below exists for the visitor who still doubts.
-- **Best preselected.** Best is the highest-value option for the customer, not a trick: 10 products for $39. It is ribboned and taller, but Good and Better keep equal clarity (same type, same radios), no dark patterns. Preselection also means a visitor who only taps the CTA gets the best deal.
+- **Mobile header.** The shop button stays on one line to fit within the sticky header on narrow screens.
+- **Mobile comparison and checkout.** The comparison table becomes vertically stacked labeled rows without horizontal scrolling; the demo checkout uses compact spacing to keep its actions visible on small screens.
+- **Best preselected.** Best is the highest-value option for the customer, not a trick: 10 products for $39. It is ribboned, while the three cards share aligned edges and equally clear radios.
 - **Price per product** ($7.00 · $6.00 · $3.90, "You save 44% per product" vs Good). It is plain arithmetic, makes the tiers comparable at a glance, and turns "buy 4, get 6" into the more honest "10 products for $39". The CTA names the total: "Get my 10 products — $39".
 - **Order flips on mobile.** Desktop reads Good, Better, Best left to right. Below 768 px the stack is Best, Better, Good so the high anchor comes first. `main.js` also reorders the DOM at that breakpoint so arrow-key and tab order match what is on screen.
 - **Mobile hero.** Photo cropped 4:3 (keeps the full width of the product line), copy and CTA below. The CTA ends at y=739 on a 390x844 viewport, so it is visible without scrolling. Bullets come after the CTA on mobile.
 - **Color discipline.** Light grounds dominate, navy for ink and small marks, cranberry only for the CTA, prices and the final band. The footer is navy so the final cranberry band is never stacked against another cranberry block.
-- **No invented proof.** No stars, review text, names, family count, certifications or struck-through prices. Reviews show real customer photos with explicit placeholders for the text.
+- **No invented proof.** No stars, review text, names, family count, certifications or struck-through prices. The photo gallery does not present unverified testimonials.
 - **Motion.** One fade + 12 px rise (200 ms, once) on sections below the hero, none under `prefers-reduced-motion`. No parallax, snow, confetti, countdowns or gradients.
 - **Accessibility.** Native radios in a `fieldset`, `input type=range` for the sliders, `details/summary` FAQ, 2 px focus ring (white on dark), `inert` on the sticky bar while hidden, skip link, descriptive `alt`.
 
@@ -66,7 +67,7 @@ Repository secrets: `VPS_SSH_KEY` (dedicated key for this repo), `VPS_KNOWN_HOST
 `dataLayer` events, all with `variant`: `experiment_view`, `view_offer`, `select_tier {tier, price}`, `begin_checkout {tier, price, value, currency, cta_location}`, `scroll_depth {percent}`, `ba_interact {pair}`, `faq_open {question}`, `click_phone {location}`.
 `begin_checkout` fires on the three links that go to checkout (`cta_location`: `offer`, `sticky`, `final`). The hero and header buttons only scroll to `#offer`, so they do not fire it. No heatmaps or A/B results are shown: there is no traffic, and simulated data would be invented data.
 
-Purchase CTAs point to `/checkout?bundle=good|better|best`. `checkout/index.html` is a documented placeholder (`noindex`) so the demo link does not 404; replace it with the real checkout and variant IDs.
+Purchase CTAs point to `/checkout?bundle=good|better|best`. `checkout/index.html` is a demo (`noindex`); its pay button explains that no order or payment is made. Replace it with the real checkout and variant IDs before selling.
 
 ## Pending data (`[VERIFICAR]`) and deviations
 
@@ -75,13 +76,13 @@ Facts taken from the live offer page `my4.trulyfreehome.com/offers/fc-feg-b4g6-v
 - Support phone 231-944-1716, hours Mon–Fri 9AM–9PM EST, address 6261 US Highway 31 N, Williamsburg, MI 49690, Privacy/Terms links.
 - "Orders before 3 PM EST ship the same business day" (announcement bar, FAQ, schema handling time 0–1 days).
 - 30-day money-back guarantee wording and "no subscription required" (guarantee, FAQ, tier footnote).
-- FAQ line that the non-toxic formula is safe around pets.
+- The sibling offer's pet-safety claims apply to Floor Cleaner; the FAQ directs customers to the Frosted Cranberry labels instead.
 
-Still open, shown as visible placeholders or left out:
+Still open or left out:
 
 - **Official logo SVG.** Wordmark "Truly Free Home" in Merriweather 700 with a `TODO` comment in the header. No Organization `logo` in the schema.
 - **Shipping per tier.** Cards and table say "Shipping calculated at checkout". The sibling page shows $4.95 on lower tiers and free on the top tier, unconfirmed here. No `shippingRate` in the schema.
-- **Reviews.** Review text, names, ratings and the rating summary are dashed `[VERIFICAR]` boxes. `AggregateRating` is omitted until real reviews exist.
+- **Reviews.** No verified review text, ratings or summary are available; `AggregateRating` is omitted.
 - **Families count.** Omitted: the sources disagree (598,000 vs 648,000).
 - **"Limited" scent claim.** The blueprint's "Limited holiday scent" / "limited batch" is replaced by "Holiday 2026", since limited stock is unconfirmed.
 - **Bundle contents.** Whether units are refill pouches or bottles, and whether Best includes reusable bottles. The FAQ only states that both products are refillable.
@@ -98,6 +99,6 @@ Still open, shown as visible placeholders or left out:
 
 - **Fonts are self-hosted** (Latin subset woff2, preloaded, `font-display: swap`): no third-party request, no render-blocking stylesheet. Merriweather 700 / 400 italic and Figtree 400-800 (one variable file).
 - **CSP** via `<meta>` (script hash computed at build for the single inline init script; JSON-LD is a data block and unaffected) plus `frame-ancestors`, `Permissions-Policy`, `nosniff` and `Referrer-Policy` headers in `deploy/nginx.conf`.
-- **Analytics, consent and experiments.** GA4, Tag Manager and Microsoft Clarity are wired but off until IDs are provided at build (`GTM_ID`, or `GA4_ID` and `CLARITY_ID`). They load only after the visitor accepts, with Consent Mode v2, and the CSP opens only the hosts in use. No ID is invented. A/B variants `/v1/` (hero photo) and `/v2/` (H1) are built from the same generator. Full detail, event taxonomy, sample-size table and what Clarity would answer: [`docs/measurement-and-experiments.md`](docs/measurement-and-experiments.md).
+- **Analytics and experiments.** Events remain in the in-memory `dataLayer`; no external analytics scripts or cookies are loaded. Connecting analytics requires a suitable consent mechanism. A/B variants `/v1/` (hero photo) and `/v2/` (H1) are built from the same generator.
 - **`llms.txt`** summarizes the offer and the allowed facts for AI crawlers (Lighthouse agentic audit passes). `/checkout` is `Disallow`ed in `robots.txt`.
-- **Tests** (`npm test`, needs `CHROME_PATH`, 16 cases): Best preselected and CTA, tier order per breakpoint, `select_tier` event, per-product prices, FAQ vs JSON-LD parity, no `AggregateRating`, checkout bundle param, variants (hero, H1, shared canonical, sitemap), `variant`/`value`/`currency` on events, consent flow (nothing third-party before Accept, CSP does not block GA4/Clarity/GTM), no horizontal overflow at 390/768/1024/1440, axe (landing, checkout, variants, consent bar open). CI runs them on every PR and checks generated files are committed.
+- **Tests** (`npm test`, needs `CHROME_PATH`): offer selection, pricing, schema, checkout, variants, events, responsive overflow and axe accessibility.
