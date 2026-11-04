@@ -49,20 +49,47 @@ const ctaLabel = (k) => `Get my ${BUNDLES[k].products} products — $${BUNDLES[k
 const FONT_SERIF = "/assets/fonts/frosted-cranberry-merriweather-normal-700.woff2";
 const FONT_SANS = "/assets/fonts/frosted-cranberry-figtree-variable.woff2";
 const INIT_SCRIPT = `document.documentElement.classList.add("js");window.dataLayer=window.dataLayer||[];`;
-const GTM_ID = /^GTM-[A-Z0-9]+$/.test(process.env.GTM_ID ?? "") ? process.env.GTM_ID : "";
+const pick = (name, re) => (re.test(process.env[name] ?? "") ? process.env[name] : "");
+const GTM_ID = pick("GTM_ID", /^GTM-[A-Z0-9]+$/);
+const GA4_ID = GTM_ID ? "" : pick("GA4_ID", /^G-[A-Z0-9]+$/);
+const CLARITY_ID = GTM_ID ? "" : pick("CLARITY_ID", /^[a-z0-9]{6,16}$/);
+if (GTM_ID && (process.env.GA4_ID || process.env.CLARITY_ID)) console.warn("GTM_ID is set: GA4_ID and CLARITY_ID are ignored, configure those tags inside GTM");
+const TRACKING = Boolean(GTM_ID || GA4_ID || CLARITY_ID);
 const initHash = `'sha256-${createHash("sha256").update(INIT_SCRIPT).digest("base64")}'`;
-const gtmHosts = GTM_ID ? " https://www.googletagmanager.com https://www.google-analytics.com" : "";
+const googleScript = GTM_ID || GA4_ID ? ["https://www.googletagmanager.com"] : [];
+const googleNet = GTM_ID || GA4_ID ? ["https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com"] : [];
+const clarityScript = CLARITY_ID ? ["https://www.clarity.ms", "https://scripts.clarity.ms"] : [];
+const clarityNet = CLARITY_ID ? ["https://*.clarity.ms", "https://c.bing.com"] : [];
+const sources = (...lists) => lists.flat().map((h) => ` ${h}`).join("");
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' ${initHash}${GTM_ID ? " https://www.googletagmanager.com" : ""}`,
+  `script-src 'self' ${initHash}${sources(googleScript, clarityScript)}`,
   "style-src 'self'",
-  `img-src 'self' data:${gtmHosts}`,
+  `img-src 'self' data:${sources(googleNet, clarityNet)}`,
   "font-src 'self'",
-  `connect-src 'self'${gtmHosts}${GTM_ID ? " https://region1.google-analytics.com" : ""}`,
+  `connect-src 'self'${sources(googleNet, clarityNet)}`,
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
 ].join("; ");
+const TRACKING_METAS = [
+  GTM_ID && `\n<meta name="gtm-id" content="${GTM_ID}">`,
+  GA4_ID && `\n<meta name="ga4-id" content="${GA4_ID}">`,
+  CLARITY_ID && `\n<meta name="clarity-id" content="${CLARITY_ID}">`,
+]
+  .filter(Boolean)
+  .join("");
+const PRIVACY_URL = "https://my4.trulyfreehome.com/pages/privacy-policy";
+const CONSENT_BAR = TRACKING
+  ? `<div class="consent" id="consent" role="region" aria-label="Analytics preferences" hidden>
+  <p class="consent__text">We use analytics cookies to see how this page is used and to improve it. <a href="${PRIVACY_URL}">Privacy policy</a></p>
+  <div class="consent__actions">
+    <button class="fc-btn fc-btn--secondary fc-btn--sm" type="button" data-consent="denied">Decline</button>
+    <button class="fc-btn fc-btn--secondary fc-btn--sm" type="button" data-consent="granted">Accept</button>
+  </div>
+</div>`
+  : "";
+const PREFS_BUTTON = TRACKING ? `<br><button class="site-footer__link" type="button" data-consent-open>Analytics preferences</button>` : "";
 
 const TRUST = [
   ["Plant-based", ICON.leaf],
@@ -162,8 +189,28 @@ const review = (key, alt, who) => `<article class="fc-review">
 
 const PRODUCT_ALT = "Truly Free Home Frosted Cranberry Everyday Cleaner and Aloe Hand Soap with refill pouches on a kitchen counter";
 
-const body = `
+const CONTROL = {
+  path: "",
+  hero: "hero-bundle-kitchen",
+  heroAlt: "Truly Free Home Frosted Cranberry Aloe Hand Soap and Everyday Cleaner bottles with their refill pouches on a kitchen counter, with frosted cranberries",
+  h1: "The coziest scent of the season. Zero toxic chemicals.",
+};
+const VARIANTS = {
+  control: CONTROL,
+  v1: {
+    ...CONTROL,
+    path: "v1/",
+    hero: "hero-duo-family",
+    heroAlt: "Truly Free Home Frosted Cranberry Aloe Hand Soap and Everyday Cleaner on a kitchen counter, with a parent and child out of focus in the background",
+  },
+  v2: { ...CONTROL, path: "v2/", h1: "Buy 4, get 6 free: 10 plant-powered products for $39." },
+};
+
+const renderBody = (variant) => {
+  const V = VARIANTS[variant];
+  return `
 <a class="skip" href="#main">Skip to main content</a>
+${CONSENT_BAR}
 
 <div class="fc-announce" role="region" aria-label="Offer" id="announce">
   <span class="fc-announce__msg is-active"><strong>Holiday bundle: buy 4, get 6 free</strong></span><span class="fc-announce__sep"></span><span class="fc-announce__msg">Orders before 3 PM EST ship the same day</span>
@@ -186,7 +233,7 @@ const body = `
   <div class="container hero__grid">
     <div class="hero__copy">
       <p class="t-eyebrow">Frosted Cranberry · Holiday 2026</p>
-      <h1 class="t-display" id="hero-title">The coziest scent of the season. Zero toxic chemicals.</h1>
+      <h1 class="t-display" id="hero-title">${esc(V.h1)}</h1>
       <p class="t-lead hero__lead">Frosted Cranberry Everyday Cleaner and Aloe Hand Soap — plant-powered, refillable and made in Michigan for homes with little helpers.</p>
       <div class="hero__cta">
         <a class="fc-btn fc-btn--primary" id="hero-cta" href="#offer">Choose my bundle</a>
@@ -197,7 +244,7 @@ const body = `
       </ul>
     </div>
     <div class="hero__media">
-      ${pic("hero-bundle-kitchen", { sizes: "(min-width:1024px) 560px, calc(100vw - 32px)", alt: "Truly Free Home Frosted Cranberry Aloe Hand Soap and Everyday Cleaner bottles with their refill pouches on a kitchen counter, with frosted cranberries", eager: true, fallbackWidth: 960 })}
+      ${pic(V.hero, { sizes: "(min-width:1024px) 560px, calc(100vw - 32px)", alt: V.heroAlt, eager: true, fallbackWidth: 960 })}
       <span class="hero__chip">Holiday 2026 scent</span>
     </div>
   </div>
@@ -394,7 +441,7 @@ const body = `
       <p><strong>Customer support</strong><br><a href="tel:+12319441716">231-944-1716</a><br>Mon–Fri 9AM–9PM EST</p>
     </div>
     <div>
-      <p><a href="https://my4.trulyfreehome.com/pages/privacy-policy">Privacy Policy</a><br><a href="https://my4.trulyfreehome.com/pages/terms-of-service">Terms of Service</a></p>
+      <p><a href="https://my4.trulyfreehome.com/pages/privacy-policy">Privacy Policy</a><br><a href="https://my4.trulyfreehome.com/pages/terms-of-service">Terms of Service</a>${PREFS_BUTTON}</p>
     </div>
   </div>
   <p class="container site-footer__legal">© 2026 Truly Free Home, Inc. All rights reserved. Made in Michigan.</p>
@@ -405,6 +452,7 @@ const body = `
   <a class="fc-btn fc-btn--primary" id="sticky-buy" href="/checkout?bundle=best" data-cta="sticky" data-tier="best">Get my bundle</a>
 </div>
 `;
+};
 
 const url = (k) => `${SITE}/checkout?bundle=${k}`;
 const imgUrl = (key, w) => `${SITE}${IMG}frosted-cranberry-${key}-${w}.webp`;
@@ -502,12 +550,12 @@ const jsonLd = {
   ],
 };
 
-const html = `<!doctype html>
-<html lang="en-US">
+const renderPage = (variant) => `<!doctype html>
+<html lang="en-US" data-variant="${variant}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="${CSP}">${GTM_ID ? `\n<meta name="gtm-id" content="${GTM_ID}">` : ""}
+<meta http-equiv="Content-Security-Policy" content="${CSP}">${TRACKING_METAS}
 <title>${esc(TITLE)}</title>
 <meta name="description" content="${esc(DESCRIPTION)}">
 <meta name="robots" content="index, follow">
@@ -530,20 +578,24 @@ const html = `<!doctype html>
 <link rel="preload" as="font" type="font/woff2" href="${FONT_SERIF}" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="${FONT_SANS}" crossorigin>
 <link rel="stylesheet" href="/assets/css/fonts.css">
-<link rel="preload" as="image" type="image/avif" imagesrcset="${manifest["frosted-cranberry-hero-bundle-kitchen"].widths.map((w) => `${IMG}frosted-cranberry-hero-bundle-kitchen-${w}.avif ${w}w`).join(", ")}" imagesizes="(min-width:1024px) 560px, calc(100vw - 32px)" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" imagesrcset="${manifest[`frosted-cranberry-${VARIANTS[variant].hero}`].widths.map((w) => `${IMG}frosted-cranberry-${VARIANTS[variant].hero}-${w}.avif ${w}w`).join(", ")}" imagesizes="(min-width:1024px) 560px, calc(100vw - 32px)" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/landing.css">
+<link rel="modulepreload" href="/assets/js/analytics.js">
 <script>${INIT_SCRIPT}</script>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 </head>
-<body>${body}
-<script src="/assets/js/main.js" defer></script>
+<body>${renderBody(variant)}
+<script type="module" src="/assets/js/main.js"></script>
 </body>
 </html>
 `;
 
-writeFileSync("index.html", html);
+for (const [key, v] of Object.entries(VARIANTS)) {
+  if (v.path) mkdirSync(v.path, { recursive: true });
+  writeFileSync(`${v.path}index.html`, renderPage(key));
+}
 
 const checkoutCards = Object.entries(BUNDLES)
   .map(
@@ -606,4 +658,4 @@ writeFileSync(
   "sitemap.xml",
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${SITE}/</loc><lastmod>${MODIFIED}</lastmod></url></urlset>\n`,
 );
-console.log("built index.html", html.length, "bytes");
+console.log("built", Object.keys(VARIANTS).join(", "), `tracking=${TRACKING ? "on" : "off"}`);
