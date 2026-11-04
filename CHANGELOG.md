@@ -18,6 +18,7 @@
 - Deploy to the VPS as an nginx container behind Easypanel Traefik, via GitHub Actions.
 
 ### Changed
+- Clarity consent signal is sent after the tag stub exists, so it is no longer dropped; the sticky buy bar hides while the consent bar is open.
 - With `GTM_ID`, the CSP also allows Clarity hosts so a Clarity tag inside the container is not blocked.
 - Fonts are self-hosted (woff2) instead of loaded from Google Fonts.
 - Carousels that scroll horizontally on mobile are keyboard-focusable.

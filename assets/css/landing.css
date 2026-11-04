@@ -176,3 +176,4 @@ code { font-size: 15px; }
 @media (min-width: 768px) { .consent { grid-template-columns: 1fr auto; align-items: center; } }
 .site-footer__link { padding: 0; border: 0; background: none; color: var(--white); font: inherit; text-decoration: underline; cursor: pointer; }
 .site-footer__link:focus-visible { outline: 2px solid var(--white); outline-offset: 2px; }
+body:has(.consent:not([hidden])) .fc-sticky { display: none; }

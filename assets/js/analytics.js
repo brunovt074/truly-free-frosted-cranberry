@@ -70,8 +70,8 @@ const load = () => {
 const apply = (granted) => {
   const state = granted ? "granted" : "denied";
   if (ids.gtm || ids.ga4) gtag("consent", "update", { analytics_storage: state });
-  if (ids.clarity) clarity("consentv2", { ad_Storage: "denied", analytics_Storage: state });
   if (granted) load();
+  if (ids.clarity) clarity("consentv2", { ad_Storage: "denied", analytics_Storage: state });
 };
 
 if (enabled) {
