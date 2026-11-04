@@ -24,6 +24,9 @@ jobs:
       VPS_USER: ${{ secrets.VPS_USER }}
       DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH || '/opt/frosted-cranberry' }}
       SITE_URL: ${{ vars.SITE_URL }}
+      GTM_ID: ${{ vars.GTM_ID }}
+      GA4_ID: ${{ vars.GA4_ID }}
+      CLARITY_ID: ${{ vars.CLARITY_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
