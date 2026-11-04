@@ -9,7 +9,10 @@
 - `dataLayer` events: `view_offer`, `select_tier`, `begin_checkout`, `ba_interact`, `faq_open`.
 - AVIF + WebP image pipeline (`npm run images`) and static HTML generator (`npm run build`).
 - Checkout demo page that shows the bundle chosen via `?bundle=` (payment disabled, noindex).
-- Optional Google Tag Manager loader through the `GTM_ID` build variable.
+- Google Tag Manager, GA4 and Microsoft Clarity hooks (`GTM_ID`, `GA4_ID`, `CLARITY_ID`), loaded only after consent, with a consent bar and Consent Mode v2.
+- A/B variants `/v1/` (hero photo) and `/v2/` (H1), canonical to `/`.
+- Events `experiment_view`, `scroll_depth`, `click_phone`; `variant` on every event; `value` and `currency` on `begin_checkout`.
+- `docs/measurement-and-experiments.md`.
 - `llms.txt`, Content-Security-Policy and extra security headers.
 - Test suite (`npm test`) with axe-core accessibility checks, and a CI workflow.
 - Deploy to the VPS as an nginx container behind Easypanel Traefik, via GitHub Actions.
