@@ -14,7 +14,8 @@ No tracking IDs were provided, so the page ships with the hooks and loads nothin
 SITE_URL=https://example.com GA4_ID=G-XXXX CLARITY_ID=xxxxxxxxxx npm run build
 ```
 
-- The CSP is built from the same variables, so only the hosts of the tools in use are allowed.
+- The CSP is built from the same variables, so only the hosts of the tools in use are allowed. With `GTM_ID` the Google and Clarity hosts are both allowed, because tags added inside the container are invisible to the build.
+- GTM "Custom HTML" tags are inline script and cannot be hashed at build time, so the CSP blocks them. Use the native GA4 tag and the Clarity template from the Community Template Gallery instead.
 - Consent: a bar with equal-weight Decline / Accept buttons appears only when a tool is configured. Choice is stored in `localStorage` (`fc_consent`), and "Analytics preferences" in the footer reopens it. Google Consent Mode v2 defaults are sent as `denied` and updated on accept; Clarity receives `consentv2`.
 - Trade-off: because nothing loads before consent, reported traffic is lower than real traffic. That is the price of not setting cookies without permission.
 - Not verified with real IDs. The test suite proves the right scripts are requested, only after Accept, and that the CSP does not block them. It does not prove that GA4 or Clarity accept the data.
