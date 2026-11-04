@@ -44,57 +44,30 @@ const BUNDLES = {
   better: { name: "Better", price: 24, products: 4, unit: "6.00", contents: "2 Everyday Cleaner + 2 Aloe Hand Soap" },
   best: { name: "Best", price: 39, products: 10, unit: "3.90", contents: "2 Everyday Cleaner + 2 Aloe Hand Soap, plus 3 + 3 free" },
 };
+const GLANCE_COLUMNS = [
+  ["What you get", (b) => `${b.products} products: ${b.contents}`],
+  ["Price", (b) => `$${b.price}`],
+  ["Per product", (b) => `$${b.unit}`],
+  ["Shipping", () => "Calculated at checkout"],
+  ["Guarantee", () => "30-day money-back"],
+];
 const ctaLabel = (k) => `Get my ${BUNDLES[k].products} products — $${BUNDLES[k].price}`;
 
 const FONT_SERIF = "/assets/fonts/frosted-cranberry-merriweather-normal-700.woff2";
 const FONT_SANS = "/assets/fonts/frosted-cranberry-figtree-variable.woff2";
 const INIT_SCRIPT = `document.documentElement.classList.add("js");window.dataLayer=window.dataLayer||[];`;
-const pick = (name, re) => {
-  const value = process.env[name] ?? "";
-  if (value === "") return "";
-  if (!re.test(value)) throw new Error(`${name} is set to "${value}" but does not match ${re}`);
-  return value;
-};
-const GTM_ID = pick("GTM_ID", /^GTM-[A-Z0-9]+$/);
-const GA4_ID = GTM_ID ? "" : pick("GA4_ID", /^G-[A-Z0-9]+$/);
-const CLARITY_ID = GTM_ID ? "" : pick("CLARITY_ID", /^[a-z0-9]{6,16}$/);
-if (GTM_ID && (process.env.GA4_ID || process.env.CLARITY_ID)) console.warn("GTM_ID is set: GA4_ID and CLARITY_ID are ignored, configure those tags inside GTM");
-const TRACKING = Boolean(GTM_ID || GA4_ID || CLARITY_ID);
 const initHash = `'sha256-${createHash("sha256").update(INIT_SCRIPT).digest("base64")}'`;
-const googleScript = GTM_ID || GA4_ID ? ["https://www.googletagmanager.com"] : [];
-const googleNet = GTM_ID || GA4_ID ? ["https://www.googletagmanager.com", "https://*.google-analytics.com", "https://*.analytics.google.com"] : [];
-const clarityScript = CLARITY_ID || GTM_ID ? ["https://www.clarity.ms", "https://scripts.clarity.ms"] : [];
-const clarityNet = CLARITY_ID || GTM_ID ? ["https://*.clarity.ms", "https://c.bing.com"] : [];
-const sources = (...lists) => lists.flat().map((h) => ` ${h}`).join("");
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' ${initHash}${sources(googleScript, clarityScript)}`,
+  `script-src 'self' ${initHash}`,
   "style-src 'self'",
-  `img-src 'self' data:${sources(googleNet, clarityNet)}`,
+  "img-src 'self' data:",
   "font-src 'self'",
-  `connect-src 'self'${sources(googleNet, clarityNet)}`,
+  "connect-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
 ].join("; ");
-const TRACKING_METAS = [
-  GTM_ID && `\n<meta name="gtm-id" content="${GTM_ID}">`,
-  GA4_ID && `\n<meta name="ga4-id" content="${GA4_ID}">`,
-  CLARITY_ID && `\n<meta name="clarity-id" content="${CLARITY_ID}">`,
-]
-  .filter(Boolean)
-  .join("");
-const PRIVACY_URL = "https://my4.trulyfreehome.com/pages/privacy-policy";
-const CONSENT_BAR = TRACKING
-  ? `<div class="consent" id="consent" role="region" aria-label="Analytics preferences" hidden>
-  <p class="consent__text">We use analytics cookies to see how this page is used and to improve it. <a href="${PRIVACY_URL}">Privacy policy</a></p>
-  <div class="consent__actions">
-    <button class="fc-btn fc-btn--secondary fc-btn--sm" type="button" data-consent="denied">Decline</button>
-    <button class="fc-btn fc-btn--secondary fc-btn--sm" type="button" data-consent="granted">Accept</button>
-  </div>
-</div>`
-  : "";
-const PREFS_BUTTON = TRACKING ? `<br><button class="site-footer__link" type="button" data-consent-open>Analytics preferences</button>` : "";
 
 const TRUST = [
   ["Plant-based", ICON.leaf],
@@ -110,43 +83,43 @@ const SURFACES = ["Stainless steel", "Appliances", "Toys", "Tables & chairs", "K
 const FAQ = [
   {
     q: "What does Frosted Cranberry smell like?",
-    lead: "Like a cozy holiday cranberry.",
-    rest: "Frosted Cranberry is our holiday scent, and it is the same in the Everyday Cleaner and the Aloe Hand Soap, so the counter and the sink smell alike.",
+    lead: "A little holiday cheer, from the counter to the sink.",
+    rest: "Frosted Cranberry brings a cozy cranberry scent to your everyday routine. Both the Everyday Cleaner and Aloe Hand Soap share the same festive fragrance, so you can enjoy it while tidying up and washing hands.",
   },
   {
-    q: "What's in the Best bundle exactly?",
-    lead: "Ten products for $39.",
-    rest: "You buy 2 Everyday Cleaner and 2 Aloe Hand Soap, and we add 3 Everyday Cleaner and 3 Aloe Hand Soap free. That's $3.90 per product, 44% less per product than the Good bundle.",
+    q: "What comes in the Best bundle?",
+    lead: "Your cleaning and handwashing favorites, together in one bundle.",
+    rest: "For $39, you get 10 products: buy 2 Everyday Cleaner and 2 Aloe Hand Soap, and receive 3 more of each free. That works out to $3.90 per product, 44% less per product than the Good bundle.",
   },
   {
-    q: "Are these refills or bottles?",
-    lead: "Both products are refillable.",
-    rest: "You fill a bottle with warm water to the fill line, add one refill pouch, cap it and shake gently. The steps are above.",
+    q: "How do I refill the products?",
+    lead: "Both products are made to be refilled.",
+    rest: "Keep your cleaning and handwashing routine going with refill pouches. Fill a bottle with warm water to the fill line, add a pouch, cap it and shake gently. See the refill steps above for a closer look.",
   },
   {
-    q: "Is it safe around kids and pets?",
-    lead: "Yes.",
-    rest: "Both products are made without dyes, phthalates, parabens, triclosan or quats, and the non-toxic formula is safe to use around pets. Read the label for directions.",
+    q: "Can I use these around kids and pets?",
+    lead: "Family is at the heart of why Truly Free Home started.",
+    rest: "Our founder started the company after his newborn developed a rash from laundry detergent. That experience inspired a mission to make cleaning products with family safety in mind. Before use, follow the directions and precautions on your Everyday Cleaner and Aloe Hand Soap labels.",
   },
   {
     q: "Which surfaces can I clean?",
-    lead: "100s of household surfaces.",
-    rest: "That includes stainless steel, appliances, toys, tables and chairs, kitchen surfaces, countertops, sinks and basins, porcelain and cabinets. The Everyday Cleaner is ammonia-free and chlorine-free.",
+    lead: "Everyday Cleaner is made for hundreds of household surfaces.",
+    rest: "Reach for it on kitchen surfaces, countertops, sinks, appliances, tables and chairs, toys, porcelain and cabinets. It's ammonia-free and chlorine-free, ready for the everyday messes that come with making a home.",
   },
   {
-    q: "Is this a subscription?",
-    lead: "No.",
-    rest: "This is a one-time purchase and no subscription is required.",
+    q: "Do I need a subscription?",
+    lead: "No subscription is required.",
+    rest: "Choose the bundle that fits your home and enjoy a one-time purchase. You're free to order again whenever you need more.",
   },
   {
-    q: "When will my order ship?",
-    lead: "Orders placed before 3 PM EST ship the same business day.",
-    rest: "Orders placed after 3 PM EST ship the next business day.",
+    q: "How soon will my order ship?",
+    lead: "Order before 3 PM EST and it ships the same business day.",
+    rest: "Orders placed after 3 PM EST ship the next business day, so you can look forward to bringing Frosted Cranberry into your routine.",
   },
   {
-    q: "What if I don't love it?",
-    lead: "We'll refund you in full.",
-    rest: "Try your bundle for 30 days. If you're not happy for any reason, call us at 231-944-1716 and we'll make it right with a full refund.",
+    q: "Can I try the bundle with confidence?",
+    lead: "Yes, your bundle is backed by a 30-day money-back guarantee.",
+    rest: "Bring Frosted Cranberry into your home and give it a try. If you're not happy, contact customer support at 231-944-1716 about a return and refund.",
   },
 ];
 
@@ -184,13 +157,10 @@ const baItem = (id, pair, beforeKey, afterKey, beforeAlt, afterAlt, label, produ
 
 const step = (key, alt, text) => `<li>${pic(key, { sizes: "(min-width:1024px) 380px, 112px", alt })}<div class="fc-steps__text"><p>${text}</p></div></li>`;
 
-const review = (key, alt, who) => `<article class="fc-review">
+const review = (key, alt, who) => `<figure class="fc-review">
           ${pic(key, { sizes: "(min-width:1024px) 420px, 85vw", alt, cls: "fc-review__photo" })}
-          <div class="fc-review__body">
-            <p class="fc-review__text fc-todo">[VERIFICAR: real customer review text, copied from the live offer or review system]</p>
-            <div class="fc-review__who fc-todo">[VERIFICAR: reviewer name and rating]<span>${esc(who)}</span></div>
-          </div>
-        </article>`;
+          <figcaption class="fc-review__body">${esc(who)}</figcaption>
+        </figure>`;
 
 const PRODUCT_ALT = "Truly Free Home Frosted Cranberry Everyday Cleaner and Aloe Hand Soap with refill pouches on a kitchen counter";
 
@@ -215,7 +185,6 @@ const renderBody = (variant) => {
   const V = VARIANTS[variant];
   return `
 <a class="skip" href="#main">Skip to main content</a>
-${CONSENT_BAR}
 
 <div class="fc-announce" role="region" aria-label="Offer" id="announce">
   <span class="fc-announce__msg is-active"><strong>Holiday bundle: buy 4, get 6 free</strong></span><span class="fc-announce__sep"></span><span class="fc-announce__msg">Orders before 3 PM EST ship the same day</span>
@@ -226,7 +195,7 @@ ${CONSENT_BAR}
     <!-- TODO: replace this wordmark with the official Truly Free Home SVG logo (not provided). -->
     <a class="wordmark" href="/" aria-label="Truly Free Home">Truly Free Home</a>
     <div class="site-header__side">
-      <span class="fc-muted t-small site-header__phone">Questions? <a href="tel:+12319441716">231-944-1716</a></span>
+      <span class="fc-muted t-small site-header__phone">Questions? <a href="#support">231-944-1716</a></span>
       <a class="fc-btn fc-btn--secondary fc-btn--sm" href="#offer">Shop the bundle</a>
     </div>
   </div>
@@ -303,12 +272,12 @@ ${CONSENT_BAR}
       <h3 class="t-h3" id="glance-title">Bundle at a glance</h3>
       <div class="table-wrap" role="region" aria-labelledby="glance-title" tabindex="0">
         <table>
-          <thead><tr><th scope="col">Bundle</th><th scope="col">What you get</th><th scope="col">Price</th><th scope="col">Per product</th><th scope="col">Shipping</th><th scope="col">Guarantee</th></tr></thead>
+          <thead><tr><th scope="col">Bundle</th>${GLANCE_COLUMNS.map(([label]) => `<th scope="col">${esc(label)}</th>`).join("")}</tr></thead>
           <tbody>
             ${Object.values(BUNDLES)
               .map(
                 (b) =>
-                  `<tr><th scope="row">${b.name}</th><td>${b.products} products: ${b.contents}</td><td>$${b.price}</td><td>$${b.unit}</td><td>Calculated at checkout</td><td>30-day money-back</td></tr>`,
+                  `<tr><th scope="row">${b.name}</th>${GLANCE_COLUMNS.map(([label, value]) => `<td><span class="glance__label" aria-hidden="true">${esc(label)}</span><span>${esc(value(b))}</span></td>`).join("")}</tr>`,
               )
               .join("\n            ")}
           </tbody>
@@ -346,9 +315,9 @@ ${CONSENT_BAR}
       <h2 class="t-h2" id="ba-title">Pizza night. Finger paint. Handled.</h2>
     </div>
     <ul class="ba-grid">
-      ${baItem("ba1", "table", "table-paint-before", "table-paint-after", "Wood table covered in dried finger paint before cleaning", "The same wood table wiped clean with Truly Free Home Frosted Cranberry Everyday Cleaner", "Wood table", "Everyday Cleaner")}
-      ${baItem("ba2", "counter", "counter-pizza-before", "counter-pizza-after", "Kitchen counter with pizza sauce spills before cleaning", "The same counter wiped clean with Truly Free Home Frosted Cranberry Everyday Cleaner", "Quartz counter", "Everyday Cleaner")}
-      ${baItem("ba3", "hands", "hands-paint-before", "hands-paint-after", "Child's hands covered in paint before washing", "The same hands clean after washing with Truly Free Home Frosted Cranberry Aloe Hand Soap", "Little hands", "Aloe Hand Soap")}
+      ${baItem("ba1", "table", "table-paint-before", "table-paint-after", "Wood table covered in dried finger paint before cleaning", "The same wood table wiped clean with Truly Free Home Frosted Cranberry Everyday Cleaner", "Finger paint, meet your match", "Everyday Cleaner")}
+      ${baItem("ba2", "counter", "counter-pizza-before", "counter-pizza-after", "Kitchen counter with pizza sauce spills before cleaning", "A person wiping pizza sauce from a kitchen counter with Truly Free Home Frosted Cranberry Everyday Cleaner", "Pizza night cleanup", "Everyday Cleaner")}
+      ${baItem("ba3", "hands", "hands-paint-before", "hands-paint-after", "Child's hands covered in paint before washing", "The same hands clean after washing with Truly Free Home Frosted Cranberry Aloe Hand Soap", "Little hands, big masterpieces", "Aloe Hand Soap")}
     </ul>
   </div>
 </section>
@@ -391,9 +360,8 @@ ${CONSENT_BAR}
 <section class="section reveal" aria-labelledby="reviews-title">
   <div class="container">
     <div class="section__head">
-      <p class="t-eyebrow">Reviews</p>
-      <h2 class="t-h2" id="reviews-title">Families are making the switch</h2>
-      <p class="fc-todo review-summary">[VERIFICAR: average rating and review count from the real review system. Nothing is shown until it exists.]</p>
+      <p class="t-eyebrow">At home</p>
+      <h2 class="t-h2" id="reviews-title">A little care for your everyday</h2>
     </div>
     <div class="review-grid" tabindex="0" role="region" aria-label="Customer photos">
         ${review("ugc-pizza-night", "Customer photo: a mom and two kids making pizza at a kitchen counter", "Everyday Cleaner")}
@@ -415,7 +383,7 @@ ${CONSENT_BAR}
   <div class="container">
     <div class="section__head">
       <p class="t-eyebrow">Questions</p>
-      <h2 class="t-h2" id="faq-title">Before you order</h2>
+      <h2 class="t-h2" id="faq-title">Good to know before you order</h2>
     </div>
     <div class="fc-faq">
       ${faqHtml}
@@ -442,11 +410,11 @@ ${CONSENT_BAR}
       <p class="wordmark wordmark--light">Truly Free Home</p>
       <p>Truly Free Home, Inc<br>6261 US Highway 31 N<br>Williamsburg, MI 49690</p>
     </div>
-    <div>
+    <div id="support" tabindex="-1">
       <p><strong>Customer support</strong><br><a href="tel:+12319441716">231-944-1716</a><br>Mon–Fri 9AM–9PM EST</p>
     </div>
     <div>
-      <p><a href="https://my4.trulyfreehome.com/pages/privacy-policy">Privacy Policy</a><br><a href="https://my4.trulyfreehome.com/pages/terms-of-service">Terms of Service</a>${PREFS_BUTTON}</p>
+      <p><a href="https://my4.trulyfreehome.com/pages/privacy-policy">Privacy Policy</a><br><a href="https://my4.trulyfreehome.com/pages/terms-of-service">Terms of Service</a></p>
     </div>
   </div>
   <p class="container site-footer__legal">© 2026 Truly Free Home, Inc. All rights reserved. Made in Michigan.</p>
@@ -560,7 +528,7 @@ const renderPage = (variant) => `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="${CSP}">${TRACKING_METAS}
+<meta http-equiv="Content-Security-Policy" content="${CSP}">
 <title>${esc(TITLE)}</title>
 <meta name="description" content="${esc(DESCRIPTION)}">
 <meta name="robots" content="index, follow">
@@ -586,7 +554,7 @@ const renderPage = (variant) => `<!doctype html>
 <link rel="preload" as="image" type="image/avif" imagesrcset="${manifest[`frosted-cranberry-${VARIANTS[variant].hero}`].widths.map((w) => `${IMG}frosted-cranberry-${VARIANTS[variant].hero}-${w}.avif ${w}w`).join(", ")}" imagesizes="(min-width:1024px) 560px, calc(100vw - 32px)" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/components.css">
-<link rel="stylesheet" href="/assets/css/landing.css">
+<link rel="stylesheet" href="/assets/css/landing.css?v=3">
 <link rel="modulepreload" href="/assets/js/analytics.js">
 <script>${INIT_SCRIPT}</script>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
@@ -631,17 +599,18 @@ writeFileSync(
 <link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/components.css">
-<link rel="stylesheet" href="/assets/css/landing.css">
+<link rel="stylesheet" href="/assets/css/landing.css?v=3">
+<link rel="stylesheet" href="/assets/css/checkout.css">
 </head>
 <body>
 <main class="container checkout">
   <h1 class="t-h2">Checkout</h1>
-  <p class="checkout__demo">Demo page. The real Truly Free Home checkout and variant IDs are pending, so payment is disabled here.</p>
+  <p class="checkout__demo">Demo page. The real Truly Free Home checkout is not connected; no payment will be taken.</p>
   <div id="checkout-summary">
     ${checkoutCards}
   </div>
   <p class="checkout__actions">
-    <button class="fc-btn fc-btn--primary" type="button" disabled>Pay securely (demo)</button>
+    <button class="fc-btn fc-btn--primary" type="button" data-demo-pay>Pay securely (demo)</button>
     <a class="fc-btn fc-btn--secondary" href="/#offer">Change bundle</a>
   </p>
 </main>
@@ -663,4 +632,4 @@ writeFileSync(
   "sitemap.xml",
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${SITE}/</loc><lastmod>${MODIFIED}</lastmod></url></urlset>\n`,
 );
-console.log("built", Object.keys(VARIANTS).join(", "), `tracking=${TRACKING ? "on" : "off"}`);
+console.log("built", Object.keys(VARIANTS).join(", "));

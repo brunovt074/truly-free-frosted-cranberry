@@ -9,7 +9,6 @@
 - `dataLayer` events: `view_offer`, `select_tier`, `begin_checkout`, `ba_interact`, `faq_open`.
 - AVIF + WebP image pipeline (`npm run images`) and static HTML generator (`npm run build`).
 - Checkout demo page that shows the bundle chosen via `?bundle=` (payment disabled, noindex).
-- Google Tag Manager, GA4 and Microsoft Clarity hooks (`GTM_ID`, `GA4_ID`, `CLARITY_ID`), loaded only after consent, with a consent bar and Consent Mode v2.
 - A/B variants `/v1/` (hero photo) and `/v2/` (H1), canonical to `/`.
 - Events `experiment_view`, `scroll_depth`, `click_phone`; `variant` on every event; `value` and `currency` on `begin_checkout`.
 - `docs/measurement-and-experiments.md`.
@@ -18,9 +17,13 @@
 - Deploy to the VPS as an nginx container behind Easypanel Traefik, via GitHub Actions.
 
 ### Changed
-- The deploy workflow passes `GTM_ID`, `GA4_ID` and `CLARITY_ID` repository variables to the build, so tracking can be switched on without a code change.
-- A malformed `GTM_ID`, `GA4_ID` or `CLARITY_ID` now fails the build instead of silently disabling tracking.
-- Clarity consent signal is sent after the tag stub exists, so it is no longer dropped; the sticky buy bar hides while the consent bar is open.
-- With `GTM_ID`, the CSP also allows Clarity hosts so a Clarity tag inside the container is not blocked.
+- Refresh the before-and-after captions and FAQ wording without adding product claims.
+- Reformat bundle comparisons for narrow screens and compact the mobile demo checkout so its actions are visible sooner.
+- Serve the site at `frosted-cranberry.brunodev.store` and redirect the legacy hostname while preserving paths and query strings.
+- Keep the header's shop button on one line on narrow mobile screens.
+- Compact the desktop offer to keep product images, prices and the purchase button visible together at laptop heights.
+- Removed the cookie banner and external analytics loaders; events remain in memory without cookies.
+- Aligned bundle cards, replaced the comparison highlight with a neutral navy accent, and replaced unverified review placeholders with a photo gallery.
+- The header phone link leads to support details; the demo checkout explains that no payment or order is made.
 - Fonts are self-hosted (woff2) instead of loaded from Google Fonts.
 - Carousels that scroll horizontally on mobile are keyboard-focusable.

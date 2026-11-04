@@ -15,6 +15,10 @@ services:
       traefik.http.routers.frosted-cranberry.entrypoints: https
       traefik.http.routers.frosted-cranberry.tls: "true"
       traefik.http.routers.frosted-cranberry.tls.certresolver: letsencrypt
+      traefik.http.routers.frosted-cranberry-legacy.rule: "Host(`frosted-cranberry.72-60-247-32.sslip.io`)"
+      traefik.http.routers.frosted-cranberry-legacy.entrypoints: https
+      traefik.http.routers.frosted-cranberry-legacy.tls: "true"
+      traefik.http.routers.frosted-cranberry-legacy.tls.certresolver: letsencrypt
       traefik.http.services.frosted-cranberry.loadbalancer.server.port: "80"
 networks:
   easypanel:

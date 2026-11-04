@@ -76,6 +76,22 @@ test("Best is preselected and the CTA reflects it", async () => {
   await page.close();
 });
 
+test("offer navigation shows the product images, prices and purchase button at laptop height", async () => {
+  const { page } = await open(1568);
+  await page.setViewport({ width: 1568, height: 734 });
+  await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
+  await page.click("#hero-cta");
+  await page.waitForFunction(() => location.hash === "#offer");
+  const visible = await page.evaluate(() => [".fc-tier__media", ".fc-tier__price", "#buy"].every((selector) =>
+    [...document.querySelectorAll(selector)].every((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.top >= document.querySelector(".site-header").getBoundingClientRect().bottom && rect.bottom <= innerHeight;
+    }),
+  ));
+  assert.equal(visible, true);
+  await page.close();
+});
+
 test("tier order matches the screen: Good-Better-Best on desktop, Best-Better-Good on mobile", async () => {
   const order = (page) => page.evaluate(() => [...document.querySelectorAll('input[name="bundle"]')].map((i) => i.value));
   const desktop = await open(1440);
@@ -220,85 +236,8 @@ test("a default build loads nothing third-party and shows no consent bar", async
   await page.close();
 });
 
-const openTracked = async (origin) => {
-  const page = await browser.newPage();
-  await page.setViewport({ width: 390, height: 900 });
-  const errors = [];
-  const hits = [];
-  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-  await page.setRequestInterception(true);
-  page.on("request", (req) => {
-    if (req.url().startsWith(origin)) return req.continue();
-    hits.push(req.url());
-    req.respond({ status: 200, contentType: "text/javascript", body: "" });
-  });
-  await page.goto(`${origin}/`, { waitUntil: "networkidle0" });
-  return { page, errors, hits };
-};
 
-test("direct GA4 and Clarity load only after consent and fit the CSP", async () => {
-  const { url } = await buildWith({ GA4_ID: "G-TEST12345", CLARITY_ID: "test12345a" });
-  const { page, errors, hits } = await openTracked(url);
-  assert.equal(await page.$eval("#consent", (el) => !el.hidden), true);
-  assert.deepEqual(hits, []);
-  const defaults = await page.evaluate(() => [...window.dataLayer].filter((x) => x.length).map((x) => [...x]));
-  assert.deepEqual(defaults[0], ["consent", "default", { analytics_storage: "denied", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" }]);
-  await page.click('[data-consent="granted"]');
-  await page.waitForNetworkIdle();
-  assert.ok(hits.includes("https://www.googletagmanager.com/gtag/js?id=G-TEST12345"));
-  assert.ok(hits.includes("https://www.clarity.ms/tag/test12345a"));
-  const queued = await page.evaluate(() => window.clarity.q.map((a) => [...a]).find((a) => a[0] === "consentv2"));
-  assert.deepEqual(queued[1], { ad_Storage: "denied", analytics_Storage: "granted" });
-  assert.equal(await page.$eval("#consent", (el) => el.hidden), true);
-  assert.deepEqual(errors, []);
-  await page.reload({ waitUntil: "networkidle0" });
-  assert.equal(await page.$eval("#consent", (el) => el.hidden), true);
-  assert.ok(hits.filter((h) => h.includes("clarity.ms/tag")).length >= 2);
-  await page.close();
-});
-
-test("declining keeps every tracker off and remembers the choice", async () => {
-  const { url } = await buildWith({ GA4_ID: "G-TEST12345", CLARITY_ID: "test12345a" });
-  const { page, hits } = await openTracked(url);
-  await page.click('[data-consent="denied"]');
-  await page.reload({ waitUntil: "networkidle0" });
-  assert.deepEqual(hits, []);
-  assert.equal(await page.$eval("#consent", (el) => el.hidden), true);
-  await page.click("[data-consent-open]");
-  assert.equal(await page.$eval("#consent", (el) => el.hidden), false);
-  await page.close();
-});
-
-test("the sticky buy bar yields to the consent bar and returns after the choice", async () => {
-  const { url } = await buildWith({ GA4_ID: "G-TEST12345" });
-  const { page } = await openTracked(url);
-  await page.evaluate(() => document.querySelector(".fc-faq").scrollIntoView());
-  await page.waitForFunction(() => document.getElementById("sticky").classList.contains("is-visible"));
-  assert.equal(await page.$eval("#sticky", (el) => getComputedStyle(el).display), "none");
-  await page.click('[data-consent="denied"]');
-  assert.notEqual(await page.$eval("#sticky", (el) => getComputedStyle(el).display), "none");
-  await page.close();
-});
-
-test("a malformed tracking id fails the build instead of silently disabling tracking", async () => {
-  for (const env of [{ GA4_ID: "G-TEST12345 " }, { CLARITY_ID: "Test12345a" }, { GTM_ID: "gtm-test123" }]) {
-    await assert.rejects(buildWith(env), (error) => error.stderr.includes("does not match"), JSON.stringify(env));
-  }
-});
-
-test("GTM takes over and GA4 and Clarity ids are ignored", async () => {
-  const { url } = await buildWith({ GTM_ID: "GTM-TEST123", GA4_ID: "G-TEST12345", CLARITY_ID: "test12345a" });
-  const { page, errors, hits } = await openTracked(url);
-  await page.click('[data-consent="granted"]');
-  await page.waitForNetworkIdle();
-  assert.deepEqual(hits, ["https://www.googletagmanager.com/gtm.js?id=GTM-TEST123"]);
-  assert.deepEqual(errors, []);
-  const csp = await page.$eval('meta[http-equiv="Content-Security-Policy"]', (m) => m.content);
-  assert.ok(csp.includes("https://scripts.clarity.ms") && csp.includes("https://*.clarity.ms") && csp.includes("https://c.bing.com"));
-  await page.close();
-});
-
-test("axe finds no violations with the consent bar open or on the variant pages", async () => {
+test("axe finds no violations on the variant pages", async () => {
   const axeSource = await readFile(join(process.cwd(), "node_modules/axe-core/axe.min.js"), "utf8");
   const audit = async (page) => {
     await page.evaluate(axeSource);
@@ -307,13 +246,17 @@ test("axe finds no violations with the consent bar open or on the variant pages"
       return result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`);
     });
   };
-  const { url } = await buildWith({ GA4_ID: "G-TEST12345" });
-  const { page } = await openTracked(url);
-  assert.deepEqual(await audit(page), []);
-  await page.close();
   for (const path of ["/v1/", "/v2/"]) {
     const variantPage = (await open(390, path)).page;
     assert.deepEqual(await audit(variantPage), [], path);
     await variantPage.close();
   }
+});
+
+test("demo payment explains that no order or charge was made", async () => {
+  const { page } = await open(390, "/checkout?bundle=good");
+  await page.click("[data-demo-pay]");
+  assert.match(await page.$eval("#pay-status", (el) => el.textContent), /no payment was made/i);
+  assert.match(await page.$eval("#pay-status", (el) => el.textContent), /Good · 2 products/);
+  await page.close();
 });
