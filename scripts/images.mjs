@@ -6,12 +6,14 @@ const ROOT = process.env.TF_ASSETS ?? "/home/br1/Downloads/truly-free";
 const EDC = path.join(ROOT, "drive-download-20261103T023356Z-1-001");
 const AHS = path.join(ROOT, "drive-download-20261103T023154Z-1-001");
 const OUT = path.resolve("assets/img");
+const DESIGN_SYSTEM = process.env.TF_DESIGN_SYSTEM ?? path.join(ROOT, "frosted-cranberry-design-system");
 
 const FULL = [640, 960, 1280, 1600];
 const SMALL = [640, 960];
 
 const images = [
   { name: "frosted-cranberry-hero-bundle-kitchen", src: path.join(EDC, "Hero/1x1/EDC_FRC_Hero_Bundle_1x1_4.jpg"), widths: FULL },
+  { name: "frosted-cranberry-hero-duo-family", src: path.join(DESIGN_SYSTEM, "assets/Hero/hero-duo-family.webp"), widths: FULL },
   { name: "frosted-cranberry-duo-water-flatlay", src: path.join(EDC, "Water Flatlay/Cranberry Splash Cleaning Collection.png"), widths: [640, 960, 1254] },
   { name: "frosted-cranberry-everyday-cleaner-flatlay", src: path.join(EDC, "Water Flatlay/EDC_FRC_Flatlay_1x1_2.jpg"), widths: FULL },
   { name: "frosted-cranberry-everyday-cleaner-refill-white", src: path.join(EDC, "White BG/EDC_FRC_Whitebackdrop_2.jpg"), widths: SMALL },
