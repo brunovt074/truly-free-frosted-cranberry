@@ -247,6 +247,8 @@ test("direct GA4 and Clarity load only after consent and fit the CSP", async () 
   await page.waitForNetworkIdle();
   assert.ok(hits.includes("https://www.googletagmanager.com/gtag/js?id=G-TEST12345"));
   assert.ok(hits.includes("https://www.clarity.ms/tag/test12345a"));
+  const queued = await page.evaluate(() => window.clarity.q.map((a) => [...a]).find((a) => a[0] === "consentv2"));
+  assert.deepEqual(queued[1], { ad_Storage: "denied", analytics_Storage: "granted" });
   assert.equal(await page.$eval("#consent", (el) => el.hidden), true);
   assert.deepEqual(errors, []);
   await page.reload({ waitUntil: "networkidle0" });
@@ -264,6 +266,17 @@ test("declining keeps every tracker off and remembers the choice", async () => {
   assert.equal(await page.$eval("#consent", (el) => el.hidden), true);
   await page.click("[data-consent-open]");
   assert.equal(await page.$eval("#consent", (el) => el.hidden), false);
+  await page.close();
+});
+
+test("the sticky buy bar yields to the consent bar and returns after the choice", async () => {
+  const { url } = await buildWith({ GA4_ID: "G-TEST12345" });
+  const { page } = await openTracked(url);
+  await page.evaluate(() => document.querySelector(".fc-faq").scrollIntoView());
+  await page.waitForFunction(() => document.getElementById("sticky").classList.contains("is-visible"));
+  assert.equal(await page.$eval("#sticky", (el) => getComputedStyle(el).display), "none");
+  await page.click('[data-consent="denied"]');
+  assert.notEqual(await page.$eval("#sticky", (el) => getComputedStyle(el).display), "none");
   await page.close();
 });
 
