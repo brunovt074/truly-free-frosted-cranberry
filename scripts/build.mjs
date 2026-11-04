@@ -49,7 +49,12 @@ const ctaLabel = (k) => `Get my ${BUNDLES[k].products} products — $${BUNDLES[k
 const FONT_SERIF = "/assets/fonts/frosted-cranberry-merriweather-normal-700.woff2";
 const FONT_SANS = "/assets/fonts/frosted-cranberry-figtree-variable.woff2";
 const INIT_SCRIPT = `document.documentElement.classList.add("js");window.dataLayer=window.dataLayer||[];`;
-const pick = (name, re) => (re.test(process.env[name] ?? "") ? process.env[name] : "");
+const pick = (name, re) => {
+  const value = process.env[name] ?? "";
+  if (value === "") return "";
+  if (!re.test(value)) throw new Error(`${name} is set to "${value}" but does not match ${re}`);
+  return value;
+};
 const GTM_ID = pick("GTM_ID", /^GTM-[A-Z0-9]+$/);
 const GA4_ID = GTM_ID ? "" : pick("GA4_ID", /^G-[A-Z0-9]+$/);
 const CLARITY_ID = GTM_ID ? "" : pick("CLARITY_ID", /^[a-z0-9]{6,16}$/);
